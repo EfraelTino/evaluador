@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 
 // Configura el cliente de OpenAI
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY, // Carga la clave desde las variables de entorno
+    apiKey: "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", // Carga la clave desde las variables de entorno
 });
 
 

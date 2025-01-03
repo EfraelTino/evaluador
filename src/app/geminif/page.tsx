@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react";
 import isValidUrl from "@/utils/isValidUrl";
 import axios from "axios";
-import ProcesoText from "@/components/ui/ProcesoText";
 export default function GeminiHome() {
   const [firstUrl, setFirstUrl] = useState("");
   const [secondUrl, setSecondUrl] = useState("");
@@ -49,7 +48,10 @@ export default function GeminiHome() {
             {
               data ? (
                 <div className="rounded-lg border border-ring overflow-x-auto">
-                  <ProcesoText data={data} />
+                 {
+                  /*
+                   <ProcesoText data={data} /> */
+                 }
                 </div>
               ) : <form action="" onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">

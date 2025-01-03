@@ -240,7 +240,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             results: results ? results : {},  // Asegurarse de que `results` tenga un valor por defecto
             extract: extractionResults,
         });
-g        
+        
     } catch (error) {
         console.error("Error en el proceso de extracción:", error);
         return NextResponse.json(

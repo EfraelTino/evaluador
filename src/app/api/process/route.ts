@@ -59,7 +59,7 @@ function isBlacklisted(url: string): boolean {
         );
     } catch (error) {
         console.warn(`URL inválida: ${url}; `, error);
-        return true;
+        throw new Error("URL inválida"); // Lanzar error si la URL no es válida
     }
 }
 
@@ -162,17 +162,20 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
         }, MAX_TEXT_LENGTH);
 
         if (!extractedText) {
-            throw new Error("No se encontró texto en la página.");
+            return {
+                url,
+                text: "No se encontró texto en la página.",
+                error: "Sin texto visible en la página."
+            };
         }
 
-        // Limpiar el texto y escaparlo para JSON
+        // Limpiar el texto
         const sanitizedText = cleanWebText(extractedText);
-        const safeText = JSON.stringify(sanitizedText); // Esto asegura que los caracteres especiales sean escapados
 
         console.log(`Extracción completada para URL: ${url}`);
         return {
             url,
-            text: safeText, // Usar el texto escapado
+            text: sanitizedText, // Usar texto limpio directamente
             error: null
         };
 
@@ -225,7 +228,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         }
 
         const processUrls = urls
-            .filter((url): url is string => typeof url === "string" && url.startsWith("http"))
+            .filter((url) => /^(http|https):\/\/[^\s$.?#].[^\s]*$/.test(url)) // Usar una expresión regular para validar la URL
             .slice(0, MAX_URL_COUNT);
 
         browser = await puppeteer.launch({
@@ -238,33 +241,30 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
         const extractionResults = await processUrlsSequentially(processUrls, browser);
         console.log("Extracción completada para todas las URLs");
-        console.log("lo que se extrajo: ", extractionResults);
 
         // Preparar la petición a la API de Gemini con un timeout
         const timeoutPromise = new Promise<string>((_, reject) => 
             setTimeout(() => reject(new Error('Tiempo de espera agotado')), 60000) // 60 segundos de timeout
         );
 
-        // Ejecutar la generación de contenido con un timeout
         let results: string = '';
         try {
             const result = await Promise.race([
                 geminiPetition(extractionResults),
                 timeoutPromise
             ]);
-            results = result ?? 'Hubo un problema al procesar la solicitud.'; // Valor predeterminado si es undefined
+            results = result ?? 'Hubo un problema al procesar la solicitud.';
         } catch (error) {
             console.error("Error durante la generación de contenido:", error);
             results = 'Hubo un problema al procesar la solicitud.';
         }
-        
 
         return NextResponse.json({
             message: "Proceso completado exitosamente",
-            results: results || {},  // Asegurarse de que `results` tenga un valor por defecto
+            results: results || {},
             extract: extractionResults,
         });
-        
+
     } catch (error) {
         console.error("Error en el proceso de extracción:", error);
         return NextResponse.json(
@@ -276,9 +276,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         );
     } finally {
         if (browser) {
-            await browser.close().catch(() => {
-                console.log("Error al cerrar el navegador");
-            });
+            try {
+                await browser.close();
+            } catch (error) {
+                console.error("Error al cerrar el navegador:", error);
+            }
         }
     }
 }

@@ -79,26 +79,23 @@ async function scrollWithTimeout(page: Page): Promise<void> {
         return new Promise<void>((resolve) => {
             const startTime = Date.now();
             const scrollStep = 500;
-            
-            const scrollInterval = setInterval(() => {
+
+            function scroll() {
                 window.scrollBy(0, scrollStep);
-                
-                // Verificar timeout
-                if (Date.now() - startTime > timeout) {
-                    clearInterval(scrollInterval);
+
+                // Verificar si se alcanzó el final o si el tiempo ha expirado
+                if (Date.now() - startTime > timeout || window.innerHeight + window.scrollY >= document.documentElement.scrollHeight) {
                     resolve();
-                    return;
+                } else {
+                    requestIdleCallback(scroll);
                 }
-                
-                // Verificar si llegamos al final
-                if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight) {
-                    clearInterval(scrollInterval);
-                    resolve();
-                }
-            }, 100);
+            }
+
+            requestIdleCallback(scroll);
         });
     }, SCROLL_TIMEOUT);
 }
+
 
 // Función para extraer texto visible
 function getVisibleText(element: Element): string {
@@ -151,7 +148,7 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
         });
 
         await page.goto(url, {
-            waitUntil: "domcontentloaded",
+            waitUntil: "load",
             timeout: EXTRACTION_TIMEOUT
         });
         
@@ -224,7 +221,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
             defaultViewport: chromium.defaultViewport,
             executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
+            headless: true,
         });
         console.log("Navegador iniciado correctamente");
 
@@ -243,7 +240,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             results: results ? results : {},  // Asegurarse de que `results` tenga un valor por defecto
             extract: extractionResults,
         });
-        
+g        
     } catch (error) {
         console.error("Error en el proceso de extracción:", error);
         return NextResponse.json(

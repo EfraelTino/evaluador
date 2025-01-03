@@ -30,10 +30,10 @@ interface ApiResponse {
 }
 
 // Configuración
-const EXTRACTION_TIMEOUT = 30000; // 30 segundos
+const EXTRACTION_TIMEOUT = 300000; // 30 segundos
 const MAX_URL_COUNT = 5;
 const MAX_TEXT_LENGTH = 100000;
-const SCROLL_TIMEOUT = 15000; // 15 segundos para el scroll
+const SCROLL_TIMEOUT = 150000; // 15 segundos para el scroll
 
 // Lista negra de dominios
 const DOMAIN_BLACKLIST: Set<string> = new Set([

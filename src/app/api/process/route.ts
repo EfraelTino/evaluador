@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
         });
+        console.log("se habrio el navegador");
 
         // Función de extracción de texto con mejor manejo de errores
         async function safeExtractTextFromSite(url: string) {
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
                     error: "Dominio bloqueado"
                 };
             }
+            console.log("llego al primer catch");
 
             try {
                 const page = await browser.newPage();
@@ -71,6 +73,7 @@ export async function POST(request: NextRequest) {
                     waitUntil: "networkidle2",
                     timeout: EXTRACTION_TIMEOUT
                 });
+                console.log("scroll down");
 
                 // Scroll optimizado
                 await page.evaluate(async () => {
@@ -90,6 +93,7 @@ export async function POST(request: NextRequest) {
                         }, 100);
                     });
                 });
+                console.log("termino el scroll");
 
                 // Extraer texto con límite de longitud
                 const extractedText = await page.evaluate((maxLength) => {
@@ -118,6 +122,7 @@ export async function POST(request: NextRequest) {
                 }, MAX_TEXT_LENGTH);
 
                 await page.close();
+                console.log("cerro el navegador");
 
                 return {
                     url,
@@ -126,6 +131,8 @@ export async function POST(request: NextRequest) {
                 };
 
             } catch (error) {
+                console.log("error al extraer texto", error);   
+
                 return {
                     url,
                     text: "",

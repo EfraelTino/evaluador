@@ -187,6 +187,7 @@ async function processUrlsSequentially(urls: string[], browser: Browser): Promis
     for (const url of urls) {
         try {
             const result = await safeExtractTextFromSite(url, browser);
+            console.log("Extracción completada de urls:", result);
             results.push(result);
         } catch (error) {
             results.push({
@@ -226,7 +227,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
         const extractionResults = await processUrlsSequentially(processUrls, browser);
         console.log("Extracción completada para todas las URLs");
-        console.log(extractionResults);
+        console.log("lo que se extrajo: ", extractionResults);
 
         // Preparar la petición a la API de Gemini con un timeout
         const timeoutPromise = new Promise<string>((_, reject) => 

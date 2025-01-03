@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI("AIzaSyAbyqUgPsjxM87gR6_2vI-Rwng52CL6i6s");
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+const genAI = new GoogleGenerativeAI("AIzaSyDEL12LY14U1IdSPbDpUjruiyprx8cjlhQ");
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 interface PropsGemini {
     url: string;

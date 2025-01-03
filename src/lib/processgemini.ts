@@ -20,6 +20,7 @@ export async function geminiPetition(data: PropsGemini[]) {
         url: data[1]?.url,
         text: data[1]?.text
     }
+try {
     const promptData = `
     Eres un experto diseñando landing page y funnels de venta ya sea para productos o servicios. \n
     Te voy a facilitar dos el contenido de 2 diferentes sitios web, uno es el mío y el otro es de mi competencia. \n
@@ -68,7 +69,9 @@ Usa la prueba social: `;
 
     ///enfocar a una landing page
     const result = await model.generateContent(promptData);
-    const response = await result.response;
-    const text = response.text();
-    return text;
+    const responseText = await result.response.text(); // Espera correctamente la respuesta
+    return responseText;
+} catch (error) {
+    console.log("error gemini: ", error)
+}
 }

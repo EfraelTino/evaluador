@@ -31,7 +31,7 @@ interface ApiResponse {
 
 // Configuración
 const EXTRACTION_TIMEOUT = 300000; // 30 segundos
-const MAX_URL_COUNT = 5;
+const MAX_URL_COUNT = 500;
 const MAX_TEXT_LENGTH = 100000;
 const SCROLL_TIMEOUT = 150000; // 15 segundos para el scroll
 

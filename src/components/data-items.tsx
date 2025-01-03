@@ -53,12 +53,12 @@ export default function InputsLayer({ setData, propsUbication}: propsInput) {
         <form action="" onSubmit={handleSubmit} className="space-y-4 mt-10 max-w-4xl w-full">
             <div className={propsUbication}>
                 <div className="col-span-2 space-y-2">
-                    <label htmlFor="email" className="font-semibold text-base lg:text-lg">Enlace de tu sitio web</label>
+                    <label htmlFor="email" className="font-semibold text-sm lg:text-lg">Enlace de tu sitio web</label>
                     <Input type="text" id="url" placeholder="Enlace de tu sitio web" className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-terracotta focus:ring-0 h-11 resize-none bg-white" onChange={handleChange} value={firstUrl} />
 
                 </div>
                 <div className="col-span-2 space-y-2">
-                    <label htmlFor="email" className="font-semibold text-base lg:text-lg">Enlace del sitio web de tu competencia</label>
+                    <label htmlFor="email" className="font-semibold text-sm lg:text-lg">Enlace del sitio web de tu competencia</label>
                     <Input type="text" id="secondurl" placeholder="Enlace de sitio web de tu competencia" className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-terracotta focus:ring-0 h-11 resize-none bg-white" onChange={handleChangeSecond} value={secondUrl} />
                 </div>
               {/*   <div className="col-span-1 space-y-2 w-full">
@@ -81,7 +81,7 @@ export default function InputsLayer({ setData, propsUbication}: propsInput) {
                  </div>
                 </>  
                 
-                  ) : <Button className="w-full md:w-auto px-6 py-6 flex justify-center items-center gap-2 text-lg text-white bg-terracotta hover:bg-terracotta-600 border-[0.5px] border-terracotta-500 rounded-lg transition duration-200 ease-in-out">Analizar sitio web</Button>
+                  ) : <Button className="w-full md:w-auto px-6 py-6 flex justify-center items-center gap-2 text-base text-white bg-terracotta hover:bg-terracotta-600 border-[0.5px] border-terracotta-500 rounded-lg transition duration-200 ease-in-out">Analizar sitio web</Button>
                 }
             </div>
             {

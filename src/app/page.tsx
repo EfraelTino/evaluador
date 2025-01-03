@@ -18,7 +18,7 @@ export default function Home() {
           {/* <h1 className="text-3xl pb-2 font-black leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] text-center text-white">
               Estudia a tu competencia y descubre nuevos <strong>Océanos Azules</strong>
             </h1>*/}
-          <h1 className="max-w-4xl mt-8 text-center text-charcoal-600 text-5xl md:text-7xl font-bold">
+          <h1 className="max-w-4xl mt-8 text-center text-charcoal-600 text-2xl md:text-7xl font-bold">
             Mejora tu Landing page para convertir visitantes en clientes
           </h1>
           {/*<h1 className="max-w-4xl mt-8 text-center text-charcoal-600 text-5xl md:text-7xl font-bold">
@@ -26,7 +26,7 @@ export default function Home() {
             </h1> 
             <p className="max-w-2xl mt-10 text-center text-xl md:text-2xl text-charcoal-350">Analiza el sitio web de tu competencia en segundos, con nuestro potente asistente  de AI  </p>
             <p className="max-w-2xl mt-10 text-center text-xl md:text-2xl text-charcoal-350">Analiza el sitio web de tu competencia en segundos, con nuestro potente asistente  de AI  </p> */}
-          <p className="max-w-2xl text-center text-xl md:text-2xl text-gray-500">Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con AI</p>
+          <p className="max-w-2xl text-center text-base md:text-2xl text-gray-500">Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con AI</p>
           {/*<div>
             <button className="w-full md:w-auto px-6 py-3 flex items-center justify-center bg-white border border-ivory-400 rounded-lg hover:bg-ivory-50 transition duration-200 ease-in-out group">
               <div className="flex items-center">
@@ -39,7 +39,7 @@ export default function Home() {
     
                 <ProcesoText setData={setData} data={data} />
             
-            ) : <InputsLayer data={data}  setData={setData} propsUbication="grid grid-cols-4 gap-4"/>
+            ) : <InputsLayer data={data}  setData={setData} propsUbication="grid grid-cols-1 md:grid-cols-4 gap-4"/>
           }
         </div>
       </section>

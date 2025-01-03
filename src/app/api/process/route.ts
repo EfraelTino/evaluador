@@ -227,13 +227,28 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         const extractionResults = await processUrlsSequentially(processUrls, browser);
         console.log("Extracción completada para todas las URLs");
 
-      
-         const   results = await geminiPetition(extractionResults);
-     
+        // Preparar la petición a la API de Gemini con un timeout
+        const timeoutPromise = new Promise<string>((_, reject) => 
+            setTimeout(() => reject(new Error('Tiempo de espera agotado')), 60000) // 60 segundos de timeout
+        );
+
+        // Ejecutar la generación de contenido con un timeout
+        let results: string = '';
+        try {
+            const result = await Promise.race([
+                geminiPetition(extractionResults),
+                timeoutPromise
+            ]);
+            results = result ?? 'Hubo un problema al procesar la solicitud.'; // Valor predeterminado si es undefined
+        } catch (error) {
+            console.error("Error durante la generación de contenido:", error);
+            results = 'Hubo un problema al procesar la solicitud.';
+        }
+        
 
         return NextResponse.json({
             message: "Proceso completado exitosamente",
-            results: results ? results : {},  // Asegurarse de que `results` tenga un valor por defecto
+            results: results || {},  // Asegurarse de que `results` tenga un valor por defecto
             extract: extractionResults,
         });
         

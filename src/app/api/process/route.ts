@@ -117,7 +117,6 @@ function getVisibleText(element: Element): string {
     return visibleText;
 }
 
-// Función de extracción de texto
 async function safeExtractTextFromSite(url: string, browser: Browser): Promise<ExtractionResult> {
     if (isBlacklisted(url)) {
         return {
@@ -131,11 +130,11 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
     try {
         console.log(`Iniciando extracción para URL: ${url}`);
         page = await browser.newPage();
-        
-        // Configurar timeouts
+
+        // Configurar timeouts para navegación y espera
         await page.setDefaultNavigationTimeout(EXTRACTION_TIMEOUT);
         await page.setDefaultTimeout(EXTRACTION_TIMEOUT);
-        
+
         // Interceptar y cancelar recursos innecesarios
         await page.setRequestInterception(true);
         page.on('request', (request) => {
@@ -146,19 +145,25 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
             }
         });
 
+        // Navegar a la página y esperar que se cargue completamente
         await page.goto(url, {
-            waitUntil: "load",
+            waitUntil: 'networkidle2', // Asegura que la página haya terminado de cargar
             timeout: EXTRACTION_TIMEOUT
         });
-        
+
         console.log(`Iniciando scroll para URL: ${url}`);
         await scrollWithTimeout(page);
         console.log(`Scroll completado para URL: ${url}`);
 
+        // Verificar si la página contiene texto antes de continuar
         const extractedText = await page.evaluate((maxLength: number) => {
             const text = getVisibleText(document.body);
             return text.slice(0, maxLength);
         }, MAX_TEXT_LENGTH);
+
+        if (!extractedText) {
+            throw new Error("No se encontró texto en la página.");
+        }
 
         console.log(`Extracción completada para URL: ${url}`);
         return {
@@ -168,7 +173,8 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
         };
 
     } catch (error) {
-        console.error(`Error al extraer texto de ${url}:`, error);   
+        console.error(`Error al extraer texto de ${url}:`, error);
+
         return {
             url,
             text: "",
@@ -180,6 +186,7 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
         }
     }
 }
+
 
 // Procesar URLs secuencialmente
 async function processUrlsSequentially(urls: string[], browser: Browser): Promise<ExtractionResult[]> {

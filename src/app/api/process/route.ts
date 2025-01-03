@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
                 return {
                     url,
                     text: "",
-                    error: error instanceof Error ? error.message : "Error desconocido"
+                    error: error instanceof Error ? `error 1: ${error.message}` : "Error desconocido"
                 };
             }
         }
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
 
         // Cerrar navegador
         await browser.close();
-        console.log("se cerro el navegador", typeof extractionResults);
+        console.log("se cerro el navegador",  extractionResults);
         if (procesador === 0) {
             const data = await openAiPeticion(extractionResults)
             return NextResponse.json({
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 message: "Error en extracción",
-                error: error instanceof Error ? error.message : "Error desconocido"
+                error: error instanceof Error ? `error 2: ${error.message}` : "Error desconocido"
             },
             { status: 500 }
         );

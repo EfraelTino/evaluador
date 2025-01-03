@@ -27,58 +27,55 @@ export async function POST(request: NextRequest) {
     try {
         // Parsear las URLs del cuerpo de la solicitud
         const { urls, procesador } = await request.json();
-        console.log("urls: ", urls)
+
         // Validar entrada
         if (!Array.isArray(urls) || urls.length === 0) {
             return NextResponse.json(
-                { error: "Se requiere un array de URLs válidas" },
+                { error: "Se requiere un array de URLs válidas" }, 
                 { status: 400 }
             );
         }
 
         // Limitar número de URLs
-        const processUrls = urls
-            .filter(url => typeof url === "string" && url.startsWith("http"))
-            .slice(0, MAX_URL_COUNT);
+        const processUrls = urls.slice(0, MAX_URL_COUNT);
 
         const browser = await puppeteer.launch({
             headless: true,
             timeout: EXTRACTION_TIMEOUT,
             args: [
-                "--no-sandbox",
+                "--no-sandbox", 
                 "--disable-setuid-sandbox",
                 "--disable-gpu",
                 "--disable-dev-shm-usage"
             ]
         });
-
         // Función de extracción de texto con mejor manejo de errores
         async function safeExtractTextFromSite(url: string) {
             // Validar URL
             if (isBlacklisted(url)) {
-                return {
-                    url,
-                    text: "URL no permitida",
-                    error: "Dominio bloqueado"
+                return { 
+                    url, 
+                    text: "URL no permitida", 
+                    error: "Dominio bloqueado" 
                 };
             }
 
             try {
                 const page = await browser.newPage();
-
+                
                 // Configurar tiempo de espera
                 await page.setDefaultTimeout(EXTRACTION_TIMEOUT);
 
                 // Navegar con manejo de errores
-                await page.goto(url, {
+                await page.goto(url, { 
                     waitUntil: "networkidle2",
-                    timeout: EXTRACTION_TIMEOUT
+                    timeout: EXTRACTION_TIMEOUT 
                 });
 
                 // Scroll optimizado
                 await page.evaluate(async () => {
                     await new Promise<void>((resolve) => {
-                        const scrollHeight = document.body.scrollHeight;
+                        let scrollHeight = document.body.scrollHeight;
                         let currentHeight = 0;
                         const scrollStep = 500;
 
@@ -122,17 +119,17 @@ export async function POST(request: NextRequest) {
 
                 await page.close();
 
-                return {
-                    url,
-                    text: cleanWebText(extractedText),
-                    error: null
+                return { 
+                    url, 
+                    text: cleanWebText(extractedText), 
+                    error: null 
                 };
 
             } catch (error) {
-                return {
-                    url,
-                    text: "",
-                    error: error instanceof Error ? error.message : "Error desconocido"
+                return { 
+                    url, 
+                    text: "", 
+                    error: error instanceof Error ? error.message : "Error desconocido" 
                 };
             }
         }
@@ -140,19 +137,14 @@ export async function POST(request: NextRequest) {
         // Función para verificar dominios bloqueados
         function isBlacklisted(url: string): boolean {
             try {
-                // Validar que la URL tiene un esquema correcto
                 const parsedUrl = new URL(url);
-
-                // Comparar el hostname con los dominios bloqueados
-                return Array.from(DOMAIN_BLACKLIST).some(domain =>
-                    parsedUrl.hostname.endsWith(domain)
+                return Array.from(DOMAIN_BLACKLIST).some(domain => 
+                    parsedUrl.hostname.includes(domain)
                 );
-            } catch (error) {
-                console.warn(`URL inválida: ${url}; `, error);
-                return true; // Retorna true si la URL no se puede parsear
+            } catch {
+                return true; // URL inválida
             }
         }
-
 
         // Función de limpieza de texto
         function cleanWebText(rawText: string): string {
@@ -167,37 +159,63 @@ export async function POST(request: NextRequest) {
         const extractionResults = await Promise.all(
             processUrls.map(url => safeExtractTextFromSite(url))
         );
-
         // Cerrar navegador
         await browser.close();
-        console.log("se cerro el navegador", typeof extractionResults);
-        if (procesador === 0) {
-            const data = await openAiPeticion(extractionResults)
-            return NextResponse.json({
-                message: "Extracción completada",
-                results: data,
-                extract: extractionResults,
-                //results: extractionResults
-            });
-        } else if (procesador === 1) {
-            const data = await geminiPetition(extractionResults)
-            return NextResponse.json({
-                message: "Extracción completada",
-                results: data,
-                extract: extractionResults,
-                //results: extractionResults
-            });
-        }
+        console.log("dataItemg: ", extractionResults);
 
+        if(procesador=== 0){
+            //gpt
+            console.log("dataItem: ", extractionResults);
+            const data =  await openAiPeticion(extractionResults)
+            return NextResponse.json({
+                message: "Extracción completada",
+                 results: data,
+                 proces: procesador
+             });
+        }else if(procesador === 1){
+
+            const data =  await geminiPetition(extractionResults)
+            return NextResponse.json({
+                message: "Extracción completada",
+                 results: data,
+                 proces:procesador
+             });
+        }
+        
 
     } catch (error) {
         console.error("Error en extracción web:", error);
         return NextResponse.json(
-            {
-                message: "Error en extracción",
-                error: error instanceof Error ? error.message : "Error desconocido"
-            },
+            { 
+                message: "Error en extracción", 
+                error: error instanceof Error ? error.message : "Error desconocido" 
+            }, 
             { status: 500 }
         );
     }
 }
+
+
+
+
+/////////////////////////////////////////////
+const systemMessage = `Eres un asistente especializado en auditar sitios web a nivel de contenido. Tu tarea es ayudar a los usuarios a mejorar el contenido de sus sitios web, especialmente en lo que respecta a productos y servicios. A continuación, se te proporcionarán dos enlaces: el primero corresponde al sitio web personal del usuario y el segundo es de un sitio web de competencia. Tu objetivo es evaluar ambos sitios y brindar recomendaciones para optimizar su contenido, estructura, y presentación de productos o servicios, con el fin de captar clientes potenciales o aumentar las ventas.
+
+
+
+Al evaluar los sitios, enfócate en los siguientes aspectos:
+
+- Copy: Verifica si el contenido es claro, persuasivo y está bien estructurado. Asegúrate de que se comunique de manera efectiva el valor de los productos o servicios.
+- Estructura: Muestra alternativa de cómo se puede mostrar el sitio web en general.
+- Estructura: Revisa la organización del contenido. ¿Está bien distribuido? ¿Es fácil de navegar?
+- Detalles de productos o servicios: ¿Son claros los beneficios y características de los productos/servicios? ¿Está bien detallada la información?
+- Llamados a la acción: Verifica si las llamadas a la acción (CTAs) son visibles, claras y efectivas para motivar a los usuarios a tomar acción.
+- Optimización para conversión: ¿El sitio está diseñado para convertir visitantes en clientes? Proporciona recomendaciones para mejorar esta conversión.
+
+Recuerda que las recomendaciones deben ser personalizadas y empáticas, ya que el contenido puede ser sensible para el usuario. Asegúrate de mantener siempre un tono profesional y proporcionar ejemplos prácticos donde sea posible.
+
+Si los sitios son en inglés, responde en inglés; si son en español, responde en español.`;
+
+No necesito  que saludes, 
+
+////////////////////////////////////////////////////

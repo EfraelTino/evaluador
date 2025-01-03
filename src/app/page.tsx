@@ -1,77 +1,46 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
-import { useState } from "react";
-import isValidUrl from "@/utils/isValidUrl";
-import axios from "axios";
-import ProcesoText from "@/components/ui/ProcesoText";
-import { Skeleton } from "@/components/ui/skeleton";
-export default function Home() {
-  const [firstUrl, setFirstUrl] = useState("");
-  const [secondUrl, setSecondUrl] = useState("");
-  const [data, setData] = useState("");
-  const [loading, setloading] = useState(false);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFirstUrl(e.target.value)
-    console.log(e.target.value)
-  }
-  const handleChangeSecond = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSecondUrl(e.target.value)
-    console.log(e.target.value)
-  }
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    try {
-      setloading(true);
-      const urlItem = isValidUrl(firstUrl);
-      const urlitemtwo = isValidUrl(secondUrl);
-      console.log(urlItem)
-     const response = await axios.post("/api/process", { urls: [urlItem, urlitemtwo] });
-      setData(response.data.results)
-      console.log(response.data);
-    } catch (error) {
-      console.log("error: ", error)
-    } finally {
-     // setloading(false)
-    }
 
-  }
+import ProcesoText from "@/components/ui/ProcesoText";
+import { TopMenu } from "@/components/TopMenu";
+import InputsLayer from "@/components/data-items";
+import { useState } from "react";
+export default function Home() {
+ 
+  const [data, setData] = useState<string>("");
+
 
   return (
     <>
-      <div className="bg-pared top-0 left-0 right-0 bottom-0 z-0 fixed"></div>
-      <div className="bg-black bg-opacity0 fixed top-0 right-0 left-0 bottom-0 z-[2]"></div>
-      <section className="flex justify-center items-center h-full p-6 relative z-20">
-        <div className="">
-          <div className="max-w-4xl relative z-20">
-            <h1 className="text-3xl pb-2 font-black leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] text-center text-white">
+        <TopMenu />
+
+      <section className="flex justify-center items-center h-full p-6  ">
+        <div className="max-w-4xl flex flex-col justify-center items-center">
+          {/* <h1 className="text-3xl pb-2 font-black leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] text-center text-white">
+              Estudia a tu competencia y descubre nuevos <strong>Océanos Azules</strong>
+            </h1>*/}
+          <h1 className="max-w-4xl mt-8 text-center text-charcoal-600 text-5xl md:text-7xl font-bold">
+            Mejora tu Landing page para convertir visitantes en clientes
+          </h1>
+          {/*<h1 className="max-w-4xl mt-8 text-center text-charcoal-600 text-5xl md:text-7xl font-bold">
               Tu agente auditor que te ayudará analizar el sitio web de tu competencia
-            </h1>
-            <p className="text-center text-lg text-white py-4">Analiza el sitio web de tu competencia en segundos, con nuestro potente asistent  de AI  </p>
-            {
-              data ? (
-                <div className="rounded-lg border border-ring overflow-x-auto">
-                  <ProcesoText data={data} />
-                </div>
-              ) : <form action="" onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-1 space-y-2">
-                    <label htmlFor="email" className="text-white text-opacity-90 text-sm">El enlace de tu sitio web</label>
-                    <Input type="text" id="url" placeholder="Enlace de tu sitio web" className="bg-white" onChange={handleChange} value={firstUrl} />
-                  </div>
-                  <div className="col-span-1 space-y-2">
-                    <label htmlFor="email" className="text-white text-opacity-90 text-sm">El enlace del sitio web de tu competencia</label>
-                    <Input type="text" id="secondurl" placeholder="Enlace de sitio web de tu competencia" className="bg-white" onChange={handleChangeSecond} value={secondUrl} />
-                  </div>
-                </div>
-                <div className="flex justify-center">
-                  {
-                    loading ? (<Skeleton className="h-4 w-full bg-primary/70 " />) : <Button className="bg-yellow-500 text-black hover:bg-yellow-600 font-bold">Analizar sitio web</Button>
-                  }
-                </div>
-              </form>
-            }
-          </div>
+            </h1> 
+            <p className="max-w-2xl mt-10 text-center text-xl md:text-2xl text-charcoal-350">Analiza el sitio web de tu competencia en segundos, con nuestro potente asistente  de AI  </p>
+            <p className="max-w-2xl mt-10 text-center text-xl md:text-2xl text-charcoal-350">Analiza el sitio web de tu competencia en segundos, con nuestro potente asistente  de AI  </p> */}
+          <p className="max-w-2xl text-center text-xl md:text-2xl text-gray-500">Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con AI</p>
+          {/*<div>
+            <button className="w-full md:w-auto px-6 py-3 flex items-center justify-center bg-white border border-ivory-400 rounded-lg hover:bg-ivory-50 transition duration-200 ease-in-out group">
+              <div className="flex items-center">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-5 w-5 mr-3"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path></svg><span className="font-roboto font-medium text-lg">Empieza gratis con Google</span>
+              </div>
+            </button>
+          </div> */}
+          {
+            data ? (
+    
+                <ProcesoText setData={setData} data={data} />
+            
+            ) : <InputsLayer data={data}  setData={setData} propsUbication="grid grid-cols-4 gap-4"/>
+          }
         </div>
       </section>
     </>

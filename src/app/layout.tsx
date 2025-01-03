@@ -1,19 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+// Supports weights 300-900
+import '@fontsource-variable/figtree';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
-  title: "Auditorweb",
+  title: "LandingLab",
   description: "Tu agente auditor impulsado con Inteligencia Artificial, que te ayudará analizar el sitio web de tu competencia, para que puedas tener el mejor sitio web.",
 };
 
@@ -23,9 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
+        className={`antialiased min-h-screen h-full flex items-center justify-center bg-ivory`}
       >
         {children}
       </body>

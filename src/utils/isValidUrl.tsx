@@ -38,6 +38,7 @@ const isValidUrl = (url: string): boolean => {
     return true;
   } catch (error) {
     // La URL no es válida
+    console.log(error)
     return false;
   }
 };

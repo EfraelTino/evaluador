@@ -1,13 +1,9 @@
-import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: "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", // Accede a la variable de entorno
-});
 
-export async function POST(request) {
-    try {
-        const { prompt } = await request.json();
+export async function POST() {
+  {/*  try {
+        const { prompt } = 's';
+       // const { prompt } = await request.json();
 
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
@@ -26,5 +22,5 @@ export async function POST(request) {
             { error: "Error al procesar la solicitud con OpenAI" },
             { status: 500 }
         );
-    }
+    }*/} 
 }

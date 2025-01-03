@@ -66,8 +66,7 @@ export async function POST(request: NextRequest) {
                 const page = await browser.newPage();
 
                 // Configurar tiempo de espera
-                await page.setDefaultTimeout(EXTRACTION_TIMEOUT);
-
+                page.setDefaultNavigationTimeout(EXTRACTION_TIMEOUT)
                 // Navegar con manejo de errores
                 await page.goto(url, {
                     waitUntil: "networkidle2",

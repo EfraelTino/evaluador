@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import openAiPeticion from "@/lib/processgpt";
 import { geminiPetition } from "@/lib/processgemini";
 // Configuración de timeout y límites
@@ -42,15 +43,10 @@ export async function POST(request: NextRequest) {
             .slice(0, MAX_URL_COUNT);
 
         const browser = await puppeteer.launch({
-            headless: true,
-            executablePath: '/usr/bin/chromium', // Asegúrate de que esté en el path de Vercel
-            timeout: EXTRACTION_TIMEOUT,
-            args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-gpu",
-                "--disable-dev-shm-usage"
-            ]
+            args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
         });
 
         // Función de extracción de texto con mejor manejo de errores

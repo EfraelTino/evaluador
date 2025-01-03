@@ -165,10 +165,14 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
             throw new Error("No se encontró texto en la página.");
         }
 
+        // Limpiar el texto y escaparlo para JSON
+        const sanitizedText = cleanWebText(extractedText);
+        const safeText = JSON.stringify(sanitizedText); // Esto asegura que los caracteres especiales sean escapados
+
         console.log(`Extracción completada para URL: ${url}`);
         return {
             url,
-            text: cleanWebText(extractedText),
+            text: safeText, // Usar el texto escapado
             error: null
         };
 

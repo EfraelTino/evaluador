@@ -14,6 +14,7 @@ interface RequestBody {
     urls: string[];
     procesador: number;
 }
+
 interface ProcessedResult {
     summary?: string;
     analysis?: string;
@@ -21,121 +22,99 @@ interface ProcessedResult {
     mainPoints?: string[];
     error?: string;
 }
+
 interface ApiResponse {
     message: string;
-    results?: ProcessedResult;
+    results?: ProcessedResult | string;
     extract?: ExtractionResult[];
     error?: string;
+    processingTime?: number;
 }
 
 // Configuración
-const EXTRACTION_TIMEOUT = 3000000; // 30 segundos
-const MAX_URL_COUNT = 5000;
-const MAX_TEXT_LENGTH = 100000;
-const SCROLL_TIMEOUT = 1500000; // 15 segundos para el scroll
+const CONFIG = {
+    TIMEOUTS: {
+        EXTRACTION: 30000,      // 30 segundos
+        SCROLL: 15000,          // 15 segundos
+        PAGE_LOAD: 30000,       // 30 segundos
+        API: 60000,             // 60 segundos
+        BROWSER_LAUNCH: 30000   // 30 segundos
+    },
+    LIMITS: {
+        MAX_URL_COUNT: 5000,
+        MAX_TEXT_LENGTH: 100000
+    },
+    DOMAIN_BLACKLIST: new Set([
+        "google.com",
+        "facebook.com",
+        "twitter.com",
+        "linkedin.com",
+        "youtube.com",
+        "instagram.com",
+        "wikipedia.org",
+        "amazon.com",
+        "apple.com",
+        "microsoft.com",
+        "gov.cl",
+        "edu.pe"
+    ])
+};
 
-// Lista negra de dominios
-const DOMAIN_BLACKLIST: Set<string> = new Set([
-    "google.com",
-    "facebook.com",
-    "twitter.com",
-    "linkedin.com",
-    "youtube.com",
-    "instagram.com",
-    "wikipedia.org",
-    "amazon.com",
-    "apple.com",
-    "microsoft.com",
-    "gov.cl",
-    "edu.pe",
-]);
+// Funciones de utilidad
+function isValidUrl(url: string): boolean {
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
+}
 
-// Función para verificar dominios bloqueados
+function cleanText(text: string): string {
+    return text
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, CONFIG.LIMITS.MAX_TEXT_LENGTH);
+}
+
 function isBlacklisted(url: string): boolean {
     try {
         const parsedUrl = new URL(url);
-        return Array.from(DOMAIN_BLACKLIST).some(domain =>
+        return Array.from(CONFIG.DOMAIN_BLACKLIST).some(domain =>
             parsedUrl.hostname.endsWith(domain)
         );
-    } catch (error) {
-        console.warn(`URL inválida: ${url}; `, error);
-        throw new Error("URL inválida"); // Lanzar error si la URL no es válida
+    } catch {
+        console.error(`URL inválida: ${url}`);
+        return true;
     }
 }
 
-// Función de limpieza de texto
-function cleanWebText(rawText: string): string {
-    return rawText
-        .replace(/\t+/g, " ")
-        .replace(/\n+/g, "\n")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
-// Función de scroll con timeout
-async function scrollWithTimeout(page: Page): Promise<void> {
-    await page.evaluate(async (timeout: number) => {
-        return new Promise<void>((resolve) => {
-            const startTime = Date.now();
-            const scrollStep = 500;
-
-            function scroll() {
-                window.scrollBy(0, scrollStep);
-
-                // Verificar si se alcanzó el final o si el tiempo ha expirado
-                if (Date.now() - startTime > timeout || window.innerHeight + window.scrollY >= document.documentElement.scrollHeight) {
-                    resolve();
-                } else {
-                    requestIdleCallback(scroll);
-                }
-            }
-
-            requestIdleCallback(scroll);
-        });
-    }, SCROLL_TIMEOUT);
-}
-
-
-// Función para extraer texto visible
-function getVisibleText(element: Element): string {
-    if (
-        element.tagName === "SCRIPT" ||
-        element.tagName === "STYLE" ||
-        element.tagName === "NOSCRIPT"
-    ) {
-        return "";
-    }
-
-    let visibleText = "";
-    for (const child of element.childNodes) {
-        if (child.nodeType === Node.TEXT_NODE) {
-            visibleText += (child as Text).textContent?.trim() + " ";
-        } else if (child.nodeType === Node.ELEMENT_NODE) {
-            visibleText += getVisibleText(child as Element);
-        }
-    }
-    return visibleText;
-}
-
+// Función principal de extracción
 async function safeExtractTextFromSite(url: string, browser: Browser): Promise<ExtractionResult> {
-    if (isBlacklisted(url)) {
-        return {
-            url,
-            text: "URL no permitida",
-            error: "Dominio bloqueado"
-        };
-    }
-
     let page: Page | null = null;
+    const extractionTimeout = setTimeout(() => {
+        if (page) {
+            page.close().catch(console.error);
+        }
+        throw new Error("Tiempo de extracción excedido");
+    }, CONFIG.TIMEOUTS.EXTRACTION);
+
     try {
-        console.log(`Iniciando extracción para URL: ${url}`);
+        if (!isValidUrl(url)) {
+            throw new Error(`Formato de URL inválido: ${url}`);
+        }
+
+        if (isBlacklisted(url)) {
+            return { url, text: "Dominio bloqueado", error: "Dominio en lista negra" };
+        }
+
         page = await browser.newPage();
-
-        // Configurar timeouts para navegación y espera
-        await page.setDefaultNavigationTimeout(EXTRACTION_TIMEOUT);
-        await page.setDefaultTimeout(EXTRACTION_TIMEOUT);
-
-        // Interceptar y cancelar recursos innecesarios
+        
+        // Configurar página
+        await page.setDefaultNavigationTimeout(CONFIG.TIMEOUTS.PAGE_LOAD);
+        await page.setDefaultTimeout(CONFIG.TIMEOUTS.PAGE_LOAD);
+        
+        // Bloquear recursos innecesarios
         await page.setRequestInterception(true);
         page.on('request', (request) => {
             if (['image', 'stylesheet', 'font', 'media'].includes(request.resourceType())) {
@@ -145,135 +124,118 @@ async function safeExtractTextFromSite(url: string, browser: Browser): Promise<E
             }
         });
 
-        // Navegar a la página y esperar que se cargue completamente
-        await page.goto(url, {
-            waitUntil: 'networkidle2', // Asegura que la página haya terminado de cargar
-            timeout: EXTRACTION_TIMEOUT
-        });
+        // Navegar con timeout
+        await Promise.race([
+            page.goto(url, { 
+                waitUntil: 'networkidle2',
+                timeout: CONFIG.TIMEOUTS.PAGE_LOAD 
+            }),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout de navegación')), CONFIG.TIMEOUTS.PAGE_LOAD)
+            )
+        ]);
 
-        console.log(`Iniciando scroll para URL: ${url}`);
-        await scrollWithTimeout(page);
-        console.log(`Scroll completado para URL: ${url}`);
+        // Extraer texto con timeout
+        const text = await Promise.race([
+            page.evaluate(() => document.body.innerText),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout de extracción de texto')), CONFIG.TIMEOUTS.EXTRACTION)
+            )
+        ]) as string;
 
-        // Verificar si la página contiene texto antes de continuar
-        const extractedText = await page.evaluate((maxLength: number) => {
-            const text = getVisibleText(document.body);
-            return text.slice(0, maxLength);
-        }, MAX_TEXT_LENGTH);
+        const cleanedText = cleanText(text);
 
-        if (!extractedText) {
-            return {
-                url,
-                text: "No se encontró texto en la página.",
-                error: "Sin texto visible en la página."
-            };
+        if (!cleanedText) {
+            return { url, text: "", error: "No se encontró contenido de texto" };
         }
 
-        // Limpiar el texto
-        const sanitizedText = cleanWebText(extractedText);
-
-        console.log(`Extracción completada para URL: ${url}`);
-        return {
-            url,
-            text: sanitizedText, // Usar texto limpio directamente
-            error: null
-        };
+        return { url, text: cleanedText, error: null };
 
     } catch (error) {
-        console.error(`Error al extraer texto de ${url}:`, error);
-
+        console.error(`Error procesando ${url}:`, error);
         return {
             url,
             text: "",
-            error: error instanceof Error ? `Error: ${error.message}` : "Error desconocido"
+            error: error instanceof Error ? error.message : "Error desconocido"
         };
     } finally {
+        clearTimeout(extractionTimeout);
         if (page) {
-            await page.close().catch(() => {});
+            await page.close().catch(console.error);
         }
     }
 }
 
-
-// Procesar URLs secuencialmente
-async function processUrlsSequentially(urls: string[], browser: Browser): Promise<ExtractionResult[]> {
-    const results: ExtractionResult[] = [];
-    for (const url of urls) {
-        try {
-            const result = await safeExtractTextFromSite(url, browser);
-            console.log("Extracción completada de urls:", result);
-            results.push(result);
-        } catch (error) {
-            results.push({
-                url,
-                text: "",
-                error: `Failed to process: ${error instanceof Error ? error.message : "Unknown error"}`
-            });
-        }
-    }
-    return results;
-}
-
+// Manejador de la ruta POST
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
     let browser: Browser | null = null;
-    try {
-        const { urls }: RequestBody = await request.json();
-        console.log("URLs recibidas:", urls);
+    const startTime = Date.now();
 
-        if (!Array.isArray(urls) || urls.length === 0) {
-            return NextResponse.json(
-                { error: "Se requiere un array de URLs válidas", message: "Error de validación" },
-                { status: 400 }
-            );
+    try {
+        const body = await request.json() as RequestBody;
+        const urls = Array.isArray(body?.urls) ? body.urls : null;
+
+        if (!urls?.length) {
+            return NextResponse.json({
+                message: "Error de validación",
+                error: "Se requiere un array de URLs"
+            }, { status: 400 });
         }
 
-        const processUrls = urls
-            .filter((url) => /^(http|https):\/\/[^\s$.?#].[^\s]*$/.test(url)) // Usar una expresión regular para validar la URL
-            .slice(0, MAX_URL_COUNT);
+        // Iniciar navegador con timeout
+        browser = await Promise.race([
+            puppeteer.launch({
+                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: true,
+            }),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout al iniciar navegador')), CONFIG.TIMEOUTS.BROWSER_LAUNCH)
+            )
+        ]) as Browser;
 
-        browser = await puppeteer.launch({
-            args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: true,
-        });
-        console.log("Navegador iniciado correctamente");
+        const validUrls = urls
+            .filter(isValidUrl)
+            .slice(0, CONFIG.LIMITS.MAX_URL_COUNT);
 
-        const extractionResults = await processUrlsSequentially(processUrls, browser);
-        console.log("Extracción completada para todas las URLs");
+        if (!validUrls.length) {
+            throw new Error("No se proporcionaron URLs válidas");
+        }
 
-        // Preparar la petición a la API de Gemini con un timeout
-        const timeoutPromise = new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error('Tiempo de espera agotado')), 60000) // 60 segundos de timeout
-        );
-
-        let results: string = '';
+        // Procesar URLs en paralelo
+        const results = await Promise.all(
+            validUrls.map(url => safeExtractTextFromSite(url, browser!))
+          );
+        // Procesar con Gemini con timeout
+        let processedResults: string | ProcessedResult = '';
         try {
-            const result = await Promise.race([
-                geminiPetition(extractionResults),
-                timeoutPromise
-            ]);
-            results = result ?? 'Hubo un problema al procesar la solicitud.';
+            processedResults = await Promise.race([
+                geminiPetition(results),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout de API Gemini')), CONFIG.TIMEOUTS.API)
+                )
+            ]) as string;
         } catch (error) {
-            console.error("Error durante la generación de contenido:", error);
-            results = 'Hubo un problema al procesar la solicitud.';
+            console.error("Error en procesamiento Gemini:", error);
+            processedResults = "Falló el procesamiento de contenido";
         }
 
         return NextResponse.json({
-            message: "Proceso completado exitosamente",
-            results: results || {},
-            extract: extractionResults,
+            message: "Procesamiento completado",
+            results: processedResults,
+            extract: results,
+            processingTime: Date.now() - startTime
         });
 
     } catch (error) {
-        console.error("Error en el proceso de extracción:", error);
-        return NextResponse.json(
-            {
-                message: "Error en la extracción",
-                error: error instanceof Error ? error.message : "Error desconocido"
-            },
-            { status: 500 }
-        );
+        console.error("Error en el procesamiento:", error);
+        return NextResponse.json({
+            message: "Falló el procesamiento",
+            error: error instanceof Error ? error.message : "Error desconocido",
+            processingTime: Date.now() - startTime
+        }, { status: 500 });
+
     } finally {
         if (browser) {
             try {

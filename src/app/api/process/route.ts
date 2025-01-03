@@ -226,6 +226,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
         const extractionResults = await processUrlsSequentially(processUrls, browser);
         console.log("Extracción completada para todas las URLs");
+        console.log(extractionResults);
 
         // Preparar la petición a la API de Gemini con un timeout
         const timeoutPromise = new Promise<string>((_, reject) => 

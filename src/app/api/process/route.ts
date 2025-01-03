@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import puppeteer, { Browser, Page } from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
-import openAiPeticion from "@/lib/processgpt";
 import { geminiPetition } from "@/lib/processgemini";
 
 // Interfaces y tipos
@@ -203,7 +202,7 @@ async function processUrlsSequentially(urls: string[], browser: Browser): Promis
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
     let browser: Browser | null = null;
     try {
-        const { urls, procesador }: RequestBody = await request.json();
+        const { urls }: RequestBody = await request.json();
         console.log("URLs recibidas:", urls);
 
         if (!Array.isArray(urls) || urls.length === 0) {
@@ -228,12 +227,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         const extractionResults = await processUrlsSequentially(processUrls, browser);
         console.log("Extracción completada para todas las URLs");
 
-        let results;
-        if (procesador === 0) {
-            results = await openAiPeticion(extractionResults);
-        } else if (procesador === 1) {
-            results = await geminiPetition(extractionResults);
-        }
+      
+         const   results = await geminiPetition(extractionResults);
+     
 
         return NextResponse.json({
             message: "Proceso completado exitosamente",

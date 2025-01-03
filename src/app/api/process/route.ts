@@ -34,15 +34,15 @@ interface ApiResponse {
 // Configuración
 const CONFIG = {
     TIMEOUTS: {
-        EXTRACTION: 30000,      // 30 segundos
-        SCROLL: 15000,          // 15 segundos
-        PAGE_LOAD: 30000,       // 30 segundos
-        API: 60000,             // 60 segundos
+        EXTRACTION: 300000,      // 30 segundos
+        SCROLL: 150000,          // 15 segundos
+        PAGE_LOAD: 300000,       // 30 segundos
+        API: 600000,             // 60 segundos
         BROWSER_LAUNCH: 30000   // 30 segundos
     },
     LIMITS: {
-        MAX_URL_COUNT: 5000,
-        MAX_TEXT_LENGTH: 100000
+        MAX_URL_COUNT: 50000,
+        MAX_TEXT_LENGTH: 10000000
     },
     DOMAIN_BLACKLIST: new Set([
         "google.com",

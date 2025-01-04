@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
-import * as cheerio from 'cheerio';
-
-import { geminiPetition } from "@/lib/processgemini"; // Procesamiento con Gemini
+import puppeteer, { Browser, Page } from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
+import { geminiPetition } from "@/lib/processgemini";
 
 // Interfaces y tipos
 interface ExtractionResult {
@@ -36,6 +35,7 @@ interface ApiResponse {
 const CONFIG = {
     TIMEOUTS: {
         EXTRACTION: 300000,      // 30 segundos
+        SCROLL: 150000,          // 15 segundos
         PAGE_LOAD: 300000,       // 30 segundos
         API: 600000,             // 60 segundos
         BROWSER_LAUNCH: 30000   // 30 segundos
@@ -72,9 +72,9 @@ function isValidUrl(url: string): boolean {
 
 function cleanText(text: string): string {
     return text
-        .replace(/\s+/g, ' ') // Limpia los espacios extras
+        .replace(/\s+/g, ' ')
         .trim()
-        .slice(0, CONFIG.LIMITS.MAX_TEXT_LENGTH); // Limita la longitud del texto
+        .slice(0, CONFIG.LIMITS.MAX_TEXT_LENGTH);
 }
 
 function isBlacklisted(url: string): boolean {
@@ -89,8 +89,16 @@ function isBlacklisted(url: string): boolean {
     }
 }
 
-// Función para extraer texto usando Cheerio
-async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
+// Función principal de extracción
+async function safeExtractTextFromSite(url: string, browser: Browser): Promise<ExtractionResult> {
+    let page: Page | null = null;
+    const extractionTimeout = setTimeout(() => {
+        if (page) {
+            page.close().catch(console.error);
+        }
+        throw new Error("Tiempo de extracción excedido");
+    }, CONFIG.TIMEOUTS.EXTRACTION);
+
     try {
         if (!isValidUrl(url)) {
             throw new Error(`Formato de URL inválido: ${url}`);
@@ -100,16 +108,41 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
             return { url, text: "Dominio bloqueado", error: "Dominio en lista negra" };
         }
 
-        const { data } = await axios.get(url, { timeout: CONFIG.TIMEOUTS.PAGE_LOAD });
+        page = await browser.newPage();
         
-        // Usar Cheerio para parsear el HTML
-        const $ = cheerio.load(data);
+        // Configurar página
+        await page.setDefaultNavigationTimeout(CONFIG.TIMEOUTS.PAGE_LOAD);
+        await page.setDefaultTimeout(CONFIG.TIMEOUTS.PAGE_LOAD);
+        
+        // Bloquear recursos innecesarios
+        await page.setRequestInterception(true);
+        page.on('request', (request) => {
+            if (['image', 'stylesheet', 'font', 'media'].includes(request.resourceType())) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
 
-        // Extraer todo el texto visible en el cuerpo de la página
-        const text = $('body')
-            .text()
-            .trim();
-        
+        // Navegar con timeout
+        await Promise.race([
+            page.goto(url, { 
+                waitUntil: 'networkidle2',
+                timeout: CONFIG.TIMEOUTS.PAGE_LOAD 
+            }),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout de navegación')), CONFIG.TIMEOUTS.PAGE_LOAD)
+            )
+        ]);
+
+        // Extraer texto con timeout
+        const text = await Promise.race([
+            page.evaluate(() => document.body.innerText),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout de extracción de texto')), CONFIG.TIMEOUTS.EXTRACTION)
+            )
+        ]) as string;
+
         const cleanedText = cleanText(text);
 
         if (!cleanedText) {
@@ -125,14 +158,18 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
             text: "",
             error: error instanceof Error ? error.message : "Error desconocido"
         };
+    } finally {
+        clearTimeout(extractionTimeout);
+        if (page) {
+            await page.close().catch(console.error);
+        }
     }
 }
 
 // Manejador de la ruta POST
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
+    let browser: Browser | null = null;
     const startTime = Date.now();
-
-    let processedResults: string | ProcessedResult = '';
 
     try {
         const body = await request.json() as RequestBody;
@@ -145,7 +182,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             }, { status: 400 });
         }
 
-        // Filtrar URLs válidas
+        // Iniciar navegador con timeout
+        browser = await Promise.race([
+            puppeteer.launch({
+                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: true,
+            }),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout al iniciar navegador')), CONFIG.TIMEOUTS.BROWSER_LAUNCH)
+            )
+        ]) as Browser;
+
         const validUrls = urls
             .filter(isValidUrl)
             .slice(0, CONFIG.LIMITS.MAX_URL_COUNT);
@@ -154,12 +203,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             throw new Error("No se proporcionaron URLs válidas");
         }
 
-        // Procesar URLs en paralelo usando Cheerio
+        // Procesar URLs en paralelo
         const results = await Promise.all(
-            validUrls.map(url => extractTextWithCheerio(url))
-        );
-
-        // Procesar con Gemini (la lógica de geminiPetition no cambia)
+            validUrls.map(url => safeExtractTextFromSite(url, browser!))
+          );
+        // Procesar con Gemini con timeout
+        let processedResults: string | ProcessedResult = '';
         try {
             processedResults = await Promise.race([
                 geminiPetition(results),
@@ -187,5 +236,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             processingTime: Date.now() - startTime
         }, { status: 500 });
 
+    } finally {
+        if (browser) {
+            try {
+                await browser.close();
+            } catch (error) {
+                console.error("Error al cerrar el navegador:", error);
+            }
+        }
     }
 }

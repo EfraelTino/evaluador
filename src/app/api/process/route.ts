@@ -1,248 +1,199 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer, { Browser, Page } from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import puppeteer from "puppeteer";
+import openAiPeticion from "@/lib/processgpt";
 import { geminiPetition } from "@/lib/processgemini";
+// Configuración de timeout y límites
+const EXTRACTION_TIMEOUT = 120000; // 30 segundos
+const MAX_URL_COUNT = 5; // Límite de URLs a procesar
+const MAX_TEXT_LENGTH = 100000; // Límite de caracteres por sitio
 
-// Interfaces y tipos
-interface ExtractionResult {
-    url: string;
-    text: string;
-    error: string | null;
-}
+// Lista negra de dominios mejorada
+const DOMAIN_BLACKLIST = new Set([
+    "google.com",
+    "facebook.com",
+    "twitter.com",
+    "linkedin.com",
+    "youtube.com",
+    "instagram.com",
+    "wikipedia.org",
+    "amazon.com",
+    "apple.com",
+    "microsoft.com",
+    "gov.cl", // Ejemplo de dominio gubernamental
+    "edu.pe", // Ejemplo de dominio educativo
+]);
 
-interface RequestBody {
-    urls: string[];
-    procesador: number;
-}
-
-interface ProcessedResult {
-    summary?: string;
-    analysis?: string;
-    keywords?: string[];
-    mainPoints?: string[];
-    error?: string;
-}
-
-interface ApiResponse {
-    message: string;
-    results?: ProcessedResult | string;
-    extract?: ExtractionResult[];
-    error?: string;
-    processingTime?: number;
-}
-
-// Configuración
-const CONFIG = {
-    TIMEOUTS: {
-        EXTRACTION: 300000,      // 30 segundos
-        SCROLL: 150000,          // 15 segundos
-        PAGE_LOAD: 300000,       // 30 segundos
-        API: 600000,             // 60 segundos
-        BROWSER_LAUNCH: 30000   // 30 segundos
-    },
-    LIMITS: {
-        MAX_URL_COUNT: 50000,
-        MAX_TEXT_LENGTH: 10000000
-    },
-    DOMAIN_BLACKLIST: new Set([
-        "google.com",
-        "facebook.com",
-        "twitter.com",
-        "linkedin.com",
-        "youtube.com",
-        "instagram.com",
-        "wikipedia.org",
-        "amazon.com",
-        "apple.com",
-        "microsoft.com",
-        "gov.cl",
-        "edu.pe"
-    ])
-};
-
-// Funciones de utilidad
-function isValidUrl(url: string): boolean {
+export async function POST(request: NextRequest) {
     try {
-        new URL(url);
-        return true;
-    } catch {
-        return false;
-    }
-}
+        // Parsear las URLs del cuerpo de la solicitud
+        const { urls, procesador } = await request.json();
 
-function cleanText(text: string): string {
-    return text
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, CONFIG.LIMITS.MAX_TEXT_LENGTH);
-}
-
-function isBlacklisted(url: string): boolean {
-    try {
-        const parsedUrl = new URL(url);
-        return Array.from(CONFIG.DOMAIN_BLACKLIST).some(domain =>
-            parsedUrl.hostname.endsWith(domain)
-        );
-    } catch {
-        console.error(`URL inválida: ${url}`);
-        return true;
-    }
-}
-
-// Función principal de extracción
-async function safeExtractTextFromSite(url: string, browser: Browser): Promise<ExtractionResult> {
-    let page: Page | null = null;
-    const extractionTimeout = setTimeout(() => {
-        if (page) {
-            page.close().catch(console.error);
-        }
-        throw new Error("Tiempo de extracción excedido");
-    }, CONFIG.TIMEOUTS.EXTRACTION);
-
-    try {
-        if (!isValidUrl(url)) {
-            throw new Error(`Formato de URL inválido: ${url}`);
+        // Validar entrada
+        if (!Array.isArray(urls) || urls.length === 0) {
+            return NextResponse.json(
+                { error: "Se requiere un array de URLs válidas" }, 
+                { status: 400 }
+            );
         }
 
-        if (isBlacklisted(url)) {
-            return { url, text: "Dominio bloqueado", error: "Dominio en lista negra" };
-        }
+        // Limitar número de URLs
+        const processUrls = urls.slice(0, MAX_URL_COUNT);
 
-        page = await browser.newPage();
-        
-        // Configurar página
-        await page.setDefaultNavigationTimeout(CONFIG.TIMEOUTS.PAGE_LOAD);
-        await page.setDefaultTimeout(CONFIG.TIMEOUTS.PAGE_LOAD);
-        
-        // Bloquear recursos innecesarios
-        await page.setRequestInterception(true);
-        page.on('request', (request) => {
-            if (['image', 'stylesheet', 'font', 'media'].includes(request.resourceType())) {
-                request.abort();
-            } else {
-                request.continue();
+        const browser = await puppeteer.launch({
+            headless: true,
+            timeout: EXTRACTION_TIMEOUT,
+            args: [
+                "--no-sandbox", 
+                "--disable-setuid-sandbox",
+                "--disable-gpu",
+                "--disable-dev-shm-usage"
+            ]
+        });
+        // Función de extracción de texto con mejor manejo de errores
+        async function safeExtractTextFromSite(url: string) {
+            // Validar URL
+            if (isBlacklisted(url)) {
+                return { 
+                    url, 
+                    text: "URL no permitida", 
+                    error: "Dominio bloqueado" 
+                };
             }
-        });
 
-        // Navegar con timeout
-        await Promise.race([
-            page.goto(url, { 
-                waitUntil: 'networkidle2',
-                timeout: CONFIG.TIMEOUTS.PAGE_LOAD 
-            }),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout de navegación')), CONFIG.TIMEOUTS.PAGE_LOAD)
-            )
-        ]);
-
-        // Extraer texto con timeout
-        const text = await Promise.race([
-            page.evaluate(() => document.body.innerText),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout de extracción de texto')), CONFIG.TIMEOUTS.EXTRACTION)
-            )
-        ]) as string;
-
-        const cleanedText = cleanText(text);
-
-        if (!cleanedText) {
-            return { url, text: "", error: "No se encontró contenido de texto" };
-        }
-
-        return { url, text: cleanedText, error: null };
-
-    } catch (error) {
-        console.error(`Error procesando ${url}:`, error);
-        return {
-            url,
-            text: "",
-            error: error instanceof Error ? error.message : "Error desconocido"
-        };
-    } finally {
-        clearTimeout(extractionTimeout);
-        if (page) {
-            await page.close().catch(console.error);
-        }
-    }
-}
-
-// Manejador de la ruta POST
-export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
-    let browser: Browser | null = null;
-    const startTime = Date.now();
-
-    try {
-        const body = await request.json() as RequestBody;
-        const urls = Array.isArray(body?.urls) ? body.urls : null;
-
-        if (!urls?.length) {
-            return NextResponse.json({
-                message: "Error de validación",
-                error: "Se requiere un array de URLs"
-            }, { status: 400 });
-        }
-
-        // Iniciar navegador con timeout
-        browser = await Promise.race([
-            puppeteer.launch({
-                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-                defaultViewport: chromium.defaultViewport,
-                executablePath: await chromium.executablePath(),
-                headless: true,
-            }),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout al iniciar navegador')), CONFIG.TIMEOUTS.BROWSER_LAUNCH)
-            )
-        ]) as Browser;
-
-        const validUrls = urls
-            .filter(isValidUrl)
-            .slice(0, CONFIG.LIMITS.MAX_URL_COUNT);
-
-        if (!validUrls.length) {
-            throw new Error("No se proporcionaron URLs válidas");
-        }
-
-        // Procesar URLs en paralelo
-        const results = await Promise.all(
-            validUrls.map(url => safeExtractTextFromSite(url, browser!))
-          );
-        // Procesar con Gemini con timeout
-        let processedResults: string | ProcessedResult = '';
-        try {
-            processedResults = await Promise.race([
-                geminiPetition(results),
-                new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Timeout de API Gemini')), CONFIG.TIMEOUTS.API)
-                )
-            ]) as string;
-        } catch (error) {
-            console.error("Error en procesamiento Gemini:", error);
-            processedResults = "Falló el procesamiento de contenido";
-        }
-
-        return NextResponse.json({
-            message: "Procesamiento completado",
-            results: processedResults,
-            extract: results,
-            processingTime: Date.now() - startTime
-        });
-
-    } catch (error) {
-        console.error("Error en el procesamiento:", error);
-        return NextResponse.json({
-            message: "Falló el procesamiento",
-            error: error instanceof Error ? error.message : "Error desconocido",
-            processingTime: Date.now() - startTime
-        }, { status: 500 });
-
-    } finally {
-        if (browser) {
             try {
-                await browser.close();
+                const page = await browser.newPage();
+                
+                // Configurar tiempo de espera
+                await page.setDefaultTimeout(EXTRACTION_TIMEOUT);
+
+                // Navegar con manejo de errores
+                await page.goto(url, { 
+                    waitUntil: "networkidle2",
+                    timeout: EXTRACTION_TIMEOUT 
+                });
+
+                // Scroll optimizado
+                await page.evaluate(async () => {
+                    await new Promise<void>((resolve) => {
+                        const scrollHeight = document.body.scrollHeight;
+                        let currentHeight = 0;
+                        const scrollStep = 500;
+
+                        const scrollInterval = setInterval(() => {
+                            window.scrollBy(0, scrollStep);
+                            currentHeight += scrollStep;
+
+                            if (currentHeight >= scrollHeight) {
+                                clearInterval(scrollInterval);
+                                resolve();
+                            }
+                        }, 100);
+                    });
+                });
+
+                // Extraer texto con límite de longitud
+                const extractedText = await page.evaluate((maxLength) => {
+                    function getVisibleText(element: Element): string {
+                        if (
+                            element.tagName === "SCRIPT" ||
+                            element.tagName === "STYLE" ||
+                            element.tagName === "NOSCRIPT"
+                        ) {
+                            return "";
+                        }
+
+                        let visibleText = "";
+                        for (const child of element.childNodes) {
+                            if (child.nodeType === Node.TEXT_NODE) {
+                                visibleText += (child as Text).textContent?.trim() + " ";
+                            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                                visibleText += getVisibleText(child as Element);
+                            }
+                        }
+                        return visibleText;
+                    }
+
+                    const text = getVisibleText(document.body);
+                    return text.slice(0, maxLength);
+                }, MAX_TEXT_LENGTH);
+
+                await page.close();
+
+                return { 
+                    url, 
+                    text: cleanWebText(extractedText), 
+                    error: null 
+                };
+
             } catch (error) {
-                console.error("Error al cerrar el navegador:", error);
+                return { 
+                    url, 
+                    text: "", 
+                    error: error instanceof Error ? error.message : "Error desconocido" 
+                };
             }
         }
+
+        // Función para verificar dominios bloqueados
+        function isBlacklisted(url: string): boolean {
+            try {
+                const parsedUrl = new URL(url);
+                return Array.from(DOMAIN_BLACKLIST).some(domain => 
+                    parsedUrl.hostname.includes(domain)
+                );
+            } catch {
+                return true; // URL inválida
+            }
+        }
+
+        // Función de limpieza de texto
+        function cleanWebText(rawText: string): string {
+            return rawText
+                .replace(/\t+/g, " ")
+                .replace(/\n+/g, "\n")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        // Procesar todas las URLs en paralelo
+        const extractionResults = await Promise.all(
+            processUrls.map(url => safeExtractTextFromSite(url))
+        );
+        // Cerrar navegador
+        await browser.close();
+        console.log("dataItemg: ", extractionResults);
+
+        if(procesador=== 0){
+            //gpt
+            console.log("dataItem: ", extractionResults);
+            const data =  await openAiPeticion(extractionResults)
+            return NextResponse.json({
+                message: "Extracción completada",
+                 results: data,
+                 proces: procesador
+             });
+        }else if(procesador === 1){
+
+            const data =  await geminiPetition(extractionResults)
+            return NextResponse.json({
+                message: "Extracción completada",
+                 results: data,
+                 proces:procesador
+             });
+        }
+        
+
+    } catch (error) {
+        console.error("Error en extracción web:", error);
+        return NextResponse.json(
+            { 
+                message: "Error en extracción", 
+                error: error instanceof Error ? error.message : "Error desconocido" 
+            }, 
+            { status: 500 }
+        );
     }
 }
+
+
+

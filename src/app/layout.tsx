@@ -16,6 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" >
+        <link rel="icon" type="image/x-icon" href="/public/LANDINGLAB.png" />
       <body
         className={`antialiased min-h-screen h-full flex items-center justify-center bg-ivory`}
       >

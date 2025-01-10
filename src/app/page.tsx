@@ -21,7 +21,7 @@ export default function Home() {
           {
             data ? (
     
-                <ProcesoText setData={setData} data={data} />
+                <ProcesoText  data={data} />
             
             ) : <InputsLayer data={data}  setData={setData} propsUbication="grid grid-cols-1 md:grid-cols-4 gap-4"/>
           }

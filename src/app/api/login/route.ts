@@ -7,7 +7,7 @@ interface ApiResponse {
     message: string;
     error?: string;
     status: boolean;
-    data?: any;
+   // data?: any;
 }
 
 interface RequestBody {
@@ -18,7 +18,7 @@ interface RequestBody {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
-    let conn;
+
     try {
         const body = await request.json() as RequestBody;
 
@@ -32,10 +32,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             );
         }
 
-        conn = await connection; // Obtén la conexión
-        const [results] = await conn.query('SELECT * FROM users WHERE uuid = ?', [body.userid]);
-
-        if (results.length === 0) {
+        const results = await connection.query('SELECT * FROM users WHERE uuid = ?', [body.userid]);
+        console.log("res: ",results);
+        
+        if (!results) {
             return NextResponse.json(
                 {
                     message: "Usuario no encontrado",
@@ -49,7 +49,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             {
                 message: "Usuario encontrado exitosamente",
                 status: true,
-                data: results[0], // Opcionalmente devolver datos del usuario encontrado
             },
             { status: 200 }
         );
@@ -64,7 +63,5 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             },
             { status: 500 }
         );
-    } finally {
-        if (conn) await conn.end(); // Asegúrate de cerrar la conexión
     }
 }

@@ -1,38 +1,22 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import LoginButton from './LoginButton';
 import { useAuthStore } from '@/store/authStore';
 import { AuthSession } from '@/types/auth';
 import { DropdownMenuDemo } from './DownProfile';
-import axios from 'axios';
 
 export const TopMenu: React.FC = () => {
   const session: AuthSession | null = useAuthStore((state) => state.session);
   const signOut = useAuthStore((state) => state.signOut);
-  const [isClient, setIsClient] = useState(false);
 
-  const sendData  = async () => {
-   const res = await axios.post("/api/login", {
-     data:'data',
-     userid:'asdasd'
-   })
-   console.log(res)
-  }
-  useEffect(() => {
-   setIsClient(true);
-     sendData()
-  }, [])
-  if (!isClient) {
-   return null; // O puedes mostrar un loader aquí
- }
   const handleLogout = async () => {
     await signOut();
     console.log('Sesión cerrada.');
   };
 
   return (
-    <nav className="flex justify-between xl:justify-center fixed top-0 left-0 right-0 bg-ivory">
+    <nav className="flex justify-between xl:justify-center fixed top-0 left-0 right-0 bg-ivory z-10">
       <div className="max-w-4xl flex w-full justify-between md:justify-between items-center py-2">
         <div className="flex items-center gap-2">
           <Image

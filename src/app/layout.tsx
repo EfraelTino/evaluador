@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 // Supports weights 300-900
 import '@fontsource-variable/figtree';
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "LandingLab",
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en"  suppressHydrationWarning={true}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/x-icon" href="/LANDINGLAB.png" />
@@ -24,6 +25,9 @@ export default function RootLayout({
         className="antialiased min-h-screen flex items-center justify-center bg-ivory"
       >
         {children}
+        <Toaster
+        
+        />
       </body>
     </html>
   );

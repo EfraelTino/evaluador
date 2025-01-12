@@ -1,13 +1,18 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { connection } from './bd';
 
-const genAI = new GoogleGenerativeAI("AIzaSyDEL12LY14U1IdSPbDpUjruiyprx8cjlhQ");
+const genAI = new GoogleGenerativeAI("AIzaSyCv7Zoh7iTar00mzf-aHbfhMnfMSMYsE-s");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 interface PropsGemini {
     url: string;
     text: string;
 }
-export async function geminiPetition(data: PropsGemini[]) {
+
+interface UpdateText {
+    affectedRows:number
+}
+export async function geminiPetition(data: PropsGemini[], insertedId: number) {
 
 
     console.log("data gemini: ", data);
@@ -68,9 +73,45 @@ Usa la prueba social: `;
 
 
     ///enfocar a una landing page
-    const result = await model.generateContent(promptData);
-    const responseText = await result.response.text(); // Espera correctamente la respuesta
-    return responseText;
+    try {
+        const result = await model.generateContent(promptData);
+        const responseText = await result.response.text(); // Espera correctamente la respuesta
+    
+        if (responseText && responseText.trim() !== "") {
+            const updateText:UpdateText = await connection.query(
+                "UPDATE landing_page_analysis SET resumen_ai = ? WHERE id = ?",
+                [JSON.stringify(responseText), insertedId]
+            );
+            console.log("id recibido en gemini:", insertedId);
+            console.log("Resultado del UPDATE:", updateText);
+            if (updateText.affectedRows >= 1) {
+                return {
+                    estado: true,
+                   text:  responseText
+                };
+            }else{
+                return {
+                    estado: false,
+                   text:  'Error al actualizar datos'
+                };
+            }
+           
+           
+        } else {
+            return {
+                estado: true,
+               text:  'Error, intenta de nuevo.'
+            };
+        }
+    
+    } catch (error) {
+        console.log("error en catch  de gemini: ", error)
+        return {
+            estado: false,
+           text:  'Error de API, intenta de nuevo.'
+        };
+    }
+    
 } catch (error) {
     console.log("error gemini: ", error)
 }

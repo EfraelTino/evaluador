@@ -3,6 +3,7 @@ import axios from "axios";
 import * as cheerio from 'cheerio';
 
 import { geminiPetition } from "@/lib/processgemini"; // Procesamiento con Gemini
+import { connection } from "@/lib/bd";
 
 // Interfaces y tipos
 interface ExtractionResult {
@@ -13,6 +14,7 @@ interface ExtractionResult {
 
 interface RequestBody {
     urls: string[];
+    userid?:string;
     procesador: number;
 }
 
@@ -22,6 +24,8 @@ interface ProcessedResult {
     keywords?: string[];
     mainPoints?: string[];
     error?: string;
+    estado?:boolean;
+    text?:string;
 }
 
 interface ApiResponse {
@@ -31,7 +35,9 @@ interface ApiResponse {
     error?: string;
     processingTime?: number;
 }
-
+interface InsertUrl{
+    insertId: number;
+}
 // Configuración
 const CONFIG = {
     TIMEOUTS: {
@@ -101,7 +107,7 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
         }
 
         const { data } = await axios.get(url, { timeout: CONFIG.TIMEOUTS.PAGE_LOAD });
-        
+
         // Usar Cheerio para parsear el HTML
         const $ = cheerio.load(data);
 
@@ -109,7 +115,7 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
         const text = $('body')
             .text()
             .trim();
-        
+
         const cleanedText = cleanText(text);
 
         if (!cleanedText) {
@@ -132,53 +138,65 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
     const startTime = Date.now();
 
-    let processedResults: string | ProcessedResult = '';
-
     try {
         const body = await request.json() as RequestBody;
         const urls = Array.isArray(body?.urls) ? body.urls : null;
+        const userid= body?.userid;
 
-        if (!urls?.length) {
+        if (!Array.isArray(urls) || urls.length === 0) {
             return NextResponse.json({
                 message: "Error de validación",
                 error: "Se requiere un array de URLs"
             }, { status: 400 });
         }
 
-        // Filtrar URLs válidas
-        const validUrls = urls
-            .filter(isValidUrl)
-            .slice(0, CONFIG.LIMITS.MAX_URL_COUNT);
+        const insertUrls:InsertUrl = await connection.query(
+            "INSERT INTO landing_page_analysis (url_1, user_id, ai_used) VALUES (?, ?, ?)",
+            [JSON.stringify(urls), userid, 1]
+        );
 
-        if (!validUrls.length) {
+        if (!insertUrls.insertId) {
+            throw new Error("No se pudo obtener el ID del registro insertado");
+        }
+
+        const insertedId = insertUrls.insertId;
+        console.log("El ID del registro insertado es:", insertedId);
+
+        const validUrls = urls.filter(isValidUrl).slice(0, CONFIG.LIMITS.MAX_URL_COUNT);
+
+        if (validUrls.length === 0) {
             throw new Error("No se proporcionaron URLs válidas");
         }
 
-        // Procesar URLs en paralelo usando Cheerio
-        const results = await Promise.all(
-            validUrls.map(url => extractTextWithCheerio(url))
-        );
+        const results = await Promise.all(validUrls.map(url => extractTextWithCheerio(url)));
 
-        // Procesar con Gemini (la lógica de geminiPetition no cambia)
+        await connection.query("UPDATE landing_page_analysis SET resume = ? WHERE id = ?", [
+            JSON.stringify(results),
+            insertedId
+        ]);
+
         try {
-            processedResults = await Promise.race([
-                geminiPetition(results),
-                new Promise((_, reject) => 
+            const processedResults:ProcessedResult = await Promise.race([
+                geminiPetition(results, insertedId),
+                new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('Timeout de API Gemini')), CONFIG.TIMEOUTS.API)
                 )
-            ]) as string;
+            ]) as ProcessedResult;
+
+            if (processedResults.estado === true) {
+                return NextResponse.json({
+                    message: "Procesamiento completado con éxito",
+                    results: processedResults.text,
+                    extract: results,
+                    processingTime: Date.now() - startTime
+                });
+            } else {
+                throw new Error("Gemini no pudo procesar el contenido");
+            }
         } catch (error) {
             console.error("Error en procesamiento Gemini:", error);
-            processedResults = "Falló el procesamiento de contenido";
+            throw new Error("Falló el procesamiento en Gemini");
         }
-
-        return NextResponse.json({
-            message: "Procesamiento completado",
-            results: processedResults,
-            extract: results,
-            processingTime: Date.now() - startTime
-        });
-
     } catch (error) {
         console.error("Error en el procesamiento:", error);
         return NextResponse.json({
@@ -186,6 +204,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             error: error instanceof Error ? error.message : "Error desconocido",
             processingTime: Date.now() - startTime
         }, { status: 500 });
-
     }
 }
+

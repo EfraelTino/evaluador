@@ -16,7 +16,12 @@ interface RequestBody {
     photoURL?: string;
     email?: string;
 }
-
+interface ResultQuery {
+    length: number
+}
+interface InsertData{
+    affectedRows:number
+}
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
 
     try {
@@ -32,22 +37,34 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             );
         }
 
-        const results = await connection.query('SELECT * FROM users WHERE uuid = ?', [body.userid]);
-        console.log("res: ",results);
+        const results:ResultQuery = await connection.query('SELECT * FROM users WHERE uuid = ?', [body.userid]);
         
-        if (!results) {
-            return NextResponse.json(
-                {
-                    message: "Usuario no encontrado",
-                    status: false,
-                },
-                { status: 404 }
-            );
+        if (results.length === 0) {
+            const insert:InsertData = await connection.query('INSERT INTO users (uuid, name, photoURL, email) VALUES (?, ?, ?, ?)', [body.userid, body.name, body.photoURL, body.email]);
+            console.log("insert: ",insert);
+            if(insert?.affectedRows === 0){
+                return NextResponse.json(
+                    {
+                        message: "Error al registrar el usuario",
+                        status: false,
+                    },
+                    { status: 404 }
+                );
+            }else{
+                return NextResponse.json(
+                    {
+                        message: "Bienvenido a la plataforma",
+                        status: true,
+                    },
+                    { status: 200 }
+                );
+            }
+            
         }
 
         return NextResponse.json(
             {
-                message: "Usuario encontrado exitosamente",
+                message: "Es un placer tenerte de vuelta",
                 status: true,
             },
             { status: 200 }

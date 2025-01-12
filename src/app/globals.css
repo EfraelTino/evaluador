@@ -89,3 +89,20 @@ body {
 .bg-text-item{
   background-image: linear-gradient(rgb(250, 250, 247), rgb(243, 242, 238));
 }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out forwards;
+}
+
+.fade-in-delay {
+  animation: fadeIn 1s ease-in-out forwards;
+  animation-delay: 0.5s;
+}

@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import Script from "next/script";
 
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 // Declaración del elemento personalizado
 export default function Home() {
   const session: AuthSession | null = useAuthStore((state) => state.session);
@@ -74,8 +75,9 @@ export default function Home() {
       <Button  onClick={handleModal} className="text-white bg-terracotta fixed left-10 font-bold bottom-10">Solita una nueva función</Button>
       {
         suggesstion && <div className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 flex justify-center items-center">
-        <div className="max-w-xl rounded-lg">
+        <div className="max-w-xl rounded-lg relative">
           {/*eslint-disable-next-line @typescript-eslint/no-namespace */}
+          <Button onClick={handleModal} className="absolute right-2 top-7 bg-white text-black"><X /> </Button>
           <div
       dangerouslySetInnerHTML={{ __html: htmlfrom }}
     />

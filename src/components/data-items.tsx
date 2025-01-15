@@ -44,12 +44,13 @@ export default function InputsLayer({ setData, propsUbication }: propsInput) {
         return setError('Ingresa una url válida');
       }
       const response = await axios.post("/api/process", { urls: [firstUrl, secondUrl], procesador: 1, userid: session?.user?.id });
+      console.log("RES FRONTEND: ", response);
       console.log(response.status);
       if (response.status === 200) {
         return setData(response.data.results)
       }
-      console.log("RES FRONTEND: ", response);
-    } catch {
+    } catch (e) {
+      console.log(" error en catch:", e)
       return setError("Error, intenta de nuevo.")
 
     } finally {

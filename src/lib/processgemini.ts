@@ -59,6 +59,7 @@ Usa la prueba social: `;
 
     try {
         console.log("entro a try de gemini");
+        console.log("id added: ", insertedId);
         const result = await model.generateContent(promptData);
         console.log("Res: ", result)
         const responseText = await result.response.text(); // Espera correctamente la respuesta

@@ -90,7 +90,7 @@ export default function Home() {
           <h1 className="max-w-4xl mt-8 text-center text-charcoal-600 text-2xl md:text-7xl font-bold">
             Mejora tu Landing page para convertir visitantes en clientes
           </h1>
-          
+          <p className="text-center text-gray-500 text-xl  my-2 md:my-8">Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con <strong>AI</strong></p>
           {
             data ? (
 

@@ -471,3 +471,27 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         }
     }
 }
+
+
+
+
+
+
+    {/*
+     tu respuesta debe ser únicamente la estructura que debe tener mi landing page, adicional genérame un JSON de esta estructura para elementor con la clave *json-elementor* \n
+
+     const promptData = `
+    Hola, en este caso vas a simular ser un agente experto en auditar sitios web a nivel de contenido. \n Entonces podrías brindar al usuario, la estructura que debe tener su sitio web extrayendo lo mejor de ambos para que su sitio web genere resultados y citar estrategias que pueda implementar con grandes empresas referentes en un rubro para que esta empresa pueda escalar. \n
+     Debes de verificar que ambos sitios web pertenezcan al mismo rubro, si no es así deberás mandar un mensaje de: Los sitios web no pertenecen al mismo rubro. \n
+    Este es el contenido extraído de mi sitio web: ${websiteOne.text} \n
+    Y este el contenido extraído de mi competencia: ${websiteTwo.text} \n
+
+    Si vez que la estructura no es tan buena y eficiente para vender un productos o vender un servicio necesito que recomiendes que estructura debe seguir y tener su página web para generar resultados.
+
+    Adicional sugiere estrategias que deben seguir y aplicar para escalar su negocio.\n
+    
+    El idioma en  el que debes de responder es el idioma que tiene mi sitio web
+    `;*/}
+
+
+    ///enfocar a una landing page

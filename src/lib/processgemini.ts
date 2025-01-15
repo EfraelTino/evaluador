@@ -55,29 +55,12 @@ Recuerda que si tu objetivo es vender o promocionar un producto o servicio, debe
 Crea sentidos de urgencia, escasez y confianza en tu landing page: \n
     1.- Usar ofertas urgentes:utilizar ofertas urgentes, como descuentos por tiempo limitado, pruebas gratuitas o bonificaciones. \n 2.- Usa señales de escasez: señales de escasez, como existencias bajas, alta demanda o disponibilidad limitada. Estas señales crean una percepción de valor y exclusividad y hacen que sus visitantes sientan que deben actuar rápido antes de perder la oportunidad. \n
 Usa la prueba social: `;
-    {/*
-     tu respuesta debe ser únicamente la estructura que debe tener mi landing page, adicional genérame un JSON de esta estructura para elementor con la clave *json-elementor* \n
 
-     const promptData = `
-    Hola, en este caso vas a simular ser un agente experto en auditar sitios web a nivel de contenido. \n Entonces podrías brindar al usuario, la estructura que debe tener su sitio web extrayendo lo mejor de ambos para que su sitio web genere resultados y citar estrategias que pueda implementar con grandes empresas referentes en un rubro para que esta empresa pueda escalar. \n
-     Debes de verificar que ambos sitios web pertenezcan al mismo rubro, si no es así deberás mandar un mensaje de: Los sitios web no pertenecen al mismo rubro. \n
-    Este es el contenido extraído de mi sitio web: ${websiteOne.text} \n
-    Y este el contenido extraído de mi competencia: ${websiteTwo.text} \n
-
-    Si vez que la estructura no es tan buena y eficiente para vender un productos o vender un servicio necesito que recomiendes que estructura debe seguir y tener su página web para generar resultados.
-
-    Adicional sugiere estrategias que deben seguir y aplicar para escalar su negocio.\n
-    
-    El idioma en  el que debes de responder es el idioma que tiene mi sitio web
-    `;*/}
-
-
-    ///enfocar a una landing page
     try {
         console.log("entro a try de gemini");
         const result = await model.generateContent(promptData);
         const responseText = await result.response.text(); // Espera correctamente la respuesta
-    
+        console.log("respuesta de gemini: ",responseText)
         if (responseText && responseText.trim() !== "") {
             const updateText:UpdateText = await connection.query(
                 "UPDATE landing_page_analysis SET resumen_ai = ? WHERE id = ?",

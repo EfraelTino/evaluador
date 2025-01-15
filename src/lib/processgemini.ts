@@ -74,6 +74,7 @@ Usa la prueba social: `;
 
     ///enfocar a una landing page
     try {
+        console.log("entro a try de gemini");
         const result = await model.generateContent(promptData);
         const responseText = await result.response.text(); // Espera correctamente la respuesta
     

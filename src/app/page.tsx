@@ -70,9 +70,11 @@ export default function Home() {
       <Script
         src="https://mhooqolm.formester.com/widget/standard.js"
         type="module"
-        strategy="afterInteractive" // Se carga después de que el contenido de la página se haya cargado
+        strategy="afterInteractive" 
+        className="z-10"
+        // Se carga después de que el contenido de la página se haya cargado
       />
-      <Button  onClick={handleModal} className="text-white bg-terracotta fixed left-10 font-bold bottom-10">Solita una nueva función</Button>
+      <Button  onClick={handleModal} className="text-white z-10 bg-terracotta fixed left-4 md:left-10 font-bold bottom-4 md:bottom-10">Solita una nueva función</Button>
       {
         suggesstion && <div className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 flex justify-center items-center">
         <div className="max-w-xl rounded-lg relative">
@@ -84,13 +86,13 @@ export default function Home() {
         </div>
       </div>
       }
-      <section className="flex justify-center items-center h-full p-6  ">
-        <div className="max-w-4xl flex flex-col justify-center items-center">
+      <section className="flex justify-center items-center h-full p-6 fade-in ">
+        <div className="max-w-4xl flex flex-col justify-center items-center ">
 
           <h1 className="max-w-4xl mt-8 text-center text-charcoal-600 text-2xl md:text-7xl font-bold">
             Mejora tu <strong className="font-extrabold">Landing page</strong> para <strong className="font-extrabold">convertir visitantes en clientes</strong>
           </h1>
-          <p className="text-center text-gray-500 text-xl  my-2 md:my-8">Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con <strong>AI</strong></p>
+          <p className="text-center text-gray-500 text-lg md:text-xl  leading-6 md:leading-normal my-2 md:my-8">Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con <strong>AI.</strong></p>
           {
             data ? (
 

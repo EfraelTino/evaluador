@@ -168,8 +168,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             throw new Error("No se proporcionaron URLs válidas");
         }
 
-        const results = await Promise.all(validUrls.map(url => extractTextWithCheerio(url)));
-
+        const results = await Promise.all(validUrls.map(async (url) => {
+            const text = await extractTextWithCheerio(url);
+            const title = await extractTitle(url);
+            return { url, title, text };
+          }));
+        console.log("res de la extraccion del url: ", results)
         await connection.query("UPDATE landing_page_analysis SET resume = ? WHERE id = ?", [
             JSON.stringify(results),
             insertedId
@@ -207,3 +211,22 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     }
 }
 
+
+
+async function extractTitle(url:string) {
+    try {
+      // Realiza una solicitud HTTP GET al sitio web
+      const { data } = await axios.get(url);
+  
+      // Carga el HTML en Cheerio
+      const $ = cheerio.load(data);
+  
+      // Selecciona la etiqueta <title> y obtiene su texto
+      const title = $('title').text();
+  
+      return title;
+    } catch (error) {
+      console.error(`Error al extraer el título de ${url}:`, error);
+      return null;
+    }
+  }

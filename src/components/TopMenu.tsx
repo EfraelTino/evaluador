@@ -16,17 +16,17 @@ export const TopMenu: React.FC = () => {
   };
 
   return (
-    <nav className="flex justify-between xl:justify-center fixed top-0 left-0 right-0 bg-ivory z-10">
+    <nav className="flex justify-between xl:justify-center fixed top-0 left-0 right-0 bg-ivory z-10 px-2 md:px-0">
       <div className="max-w-4xl flex w-full justify-between md:justify-between items-center py-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           <Image
             src={'/logo-landing.webp'}
             width={342}
             height={346}
-            className="w-10"
+            className="w-6 md:w-10"
             alt="Logo LandingLab"
           />
-          <Link className="text-2xl font-bold text-terracotta" href={'/'}>
+          <Link className="text-xl md:text-2xl font-bold text-terracotta" href={'/'}>
             LandingLab
           </Link>
         </div>

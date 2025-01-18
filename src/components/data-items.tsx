@@ -59,7 +59,7 @@ export default function InputsLayer({ setData, propsUbication }: propsInput) {
 
   }
   return (<>
-    <form action="" onSubmit={handleSubmit} className="space-y-4 mt-10 max-w-4xl w-full">
+    <form action="" onSubmit={handleSubmit} className="space-y-4 mt-10 max-w-4xl w-full ">
       <div className={propsUbication}>
         <div className="col-span-2 space-y-2">
           <label htmlFor="email" className="font-semibold text-sm lg:text-lg">Enlace de tu sitio web</label>

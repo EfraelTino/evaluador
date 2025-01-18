@@ -26,7 +26,7 @@ export const DropdownMenuDemo: React.FC<DropdownMenuDemoProps> = ({ handleLogout
     return (
         <DropdownMenu >
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="text-white bg-terracotta">
+                <Button variant="outline" className="text-white bg-terracotta p-1 md:px-3">
                     <Image
                         src={profile || '/logo-landing.webp'} // Avatar por defecto si falta photoURL
                         alt={`Foto de perfil de ${username}`}

@@ -7,13 +7,13 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCgaUbzniLLQHzn_iJHPrFkGvUkIWfbR4U",
-  authDomain: "landinglab-6c669.firebaseapp.com",
-  projectId: "landinglab-6c669",
-  storageBucket: "landinglab-6c669.firebasestorage.app",
-  messagingSenderId: "269011588390",
-  appId: "1:269011588390:web:8c0dd28c9cede538465de7",
-  measurementId: "G-8ZEWZ3B6PN"
+  apiKey: "AIzaSyCm-gPfz9R22XK86-TEO5Kg6JAx0jXNzHc",
+  authDomain: "landinglab-ai.firebaseapp.com",
+  projectId: "landinglab-ai",
+  storageBucket: "landinglab-ai.firebasestorage.app",
+  messagingSenderId: "393568607089",
+  appId: "1:393568607089:web:da47ebb5228ca65f5bb4d0",
+  measurementId: "G-9HJ1XGDN6R"
 };
 
 // Initialize Firebase

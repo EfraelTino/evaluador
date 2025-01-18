@@ -14,7 +14,7 @@ const ProcesoText: React.FC<Props> = ({ data, setData }) => {
   };
 
   return (
-    <div className="w-full mt-6 md:mt-12 p-8 inline-block rounded-[16px] bg-text-item border shadow-sm fade-in">
+    <div className="w-full mt-4 md:mt-0 p-8 inline-block rounded-[16px] bg-text-item border shadow-sm fade-in">
       <div className="flex justify-end items-center mb-6">
         <Button 
           onClick={handleCleanUp} 

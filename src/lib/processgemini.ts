@@ -5,9 +5,10 @@ const genAI = new GoogleGenerativeAI("AIzaSyCv7Zoh7iTar00mzf-aHbfhMnfMSMYsE-s");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 interface PropsGemini {
+    text: string; // Puede ser solo texto, o un formato diferente
+    title?: string | null;
     url: string;
-    text: {text:string};
-    title:string
+    error: string | null;
 }
 
 interface UpdateText {
@@ -21,12 +22,12 @@ export async function geminiPetition(data: PropsGemini[], insertedId: number) {
 
     const websiteOne = {
         url: data[0]?.url,
-        text: data[0]?.text.text,
+        text: data[0]?.text,
         title: data[0]?.title
     }
     const websiteTwo = {
         url: data[1]?.url,
-        text: data[1]?.text.text,
+        text: data[1]?.text,
         title: data[1]?.title
     }
 try {

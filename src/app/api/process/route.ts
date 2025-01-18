@@ -26,6 +26,7 @@ interface ProcessedResult {
     error?: string;
     estado?:boolean;
     text?:string;
+    title?:string | null; 
 }
 
 interface ApiResponse {
@@ -34,6 +35,7 @@ interface ApiResponse {
     extract?: ExtractionResult[];
     error?: string;
     processingTime?: number;
+    
 }
 interface InsertUrl{
     insertId: number;
@@ -169,9 +171,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         }
 
         const results = await Promise.all(validUrls.map(async (url) => {
-            const text = await extractTextWithCheerio(url);
+            const extraction = await extractTextWithCheerio(url);
             const title = await extractTitle(url);
-            return { url, title, text };
+            return {
+                title,
+                url: extraction.url,
+                text: extraction.text,
+                error: extraction.error
+            };
           }));
         console.log("res de la extraccion del url: ", results)
         await connection.query("UPDATE landing_page_analysis SET resume = ? WHERE id = ?", [
@@ -188,6 +195,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             ]) as ProcessedResult;
 
             if (processedResults.estado === true) {
+                
                 return NextResponse.json({
                     message: "Procesamiento completado con éxito",
                     results: processedResults.text,

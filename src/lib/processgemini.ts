@@ -59,7 +59,8 @@ Teniendo como referencia **${websiteTwo.title}**. La estructura de la  landing p
         console.log("id added: ", insertedId);
         const result = await model.generateContent(promptData);
         console.log("Res: ", result)
-        const responseText = await result.response.text(); // Espera correctamente la respuesta
+        const responseText = await result.response.text(); 
+        console.log("res en texto: ", responseText)
         console.log("respuesta de gemini: ",responseText)
         console.log("insert id al terminar el proceso: ",insertedId)
         if (responseText && responseText.trim() !== "") {

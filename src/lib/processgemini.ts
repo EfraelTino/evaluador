@@ -51,6 +51,7 @@ Teniendo como referencia **${websiteTwo.title}**. La estructura de la  landing p
 
 
 Tú no dudas o das ejemplos a medias, respondes a todas mis dudas de manera concisa.
+Evita responder con esto (debajo del fold), (debajo del fold)
 `;
 {/**9.- Quiero que la estructura  de landing page que muestre esté respaldada por casos de éxitos de empresas y/o empresas que han realizado landing page  y/o funnels de venta.\n  */}
 

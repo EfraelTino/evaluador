@@ -113,9 +113,18 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
         // Usar Cheerio para parsear el HTML
         const $ = cheerio.load(data);
 
+        // Excluir <script>, <style>, y otros elementos no deseados antes de extraer texto
+        $('script, style, noscript, iframe').remove();
+
         // Extraer todo el texto visible en el cuerpo de la página
         const text = $('body')
-            .text()
+            .find('*') // Encuentra todos los elementos
+            .not('script, style, noscript, iframe') // Excluye scripts y otros elementos
+            .contents()
+            .filter((_, el) => el.type === 'text') // Solo nodos de texto
+            .map((_, el) => $(el).text().trim()) // Extrae y limpia texto
+            .get() // Convierte a array
+            .join(' ') // Une el texto en un solo string
             .trim();
 
         const cleanedText = cleanText(text);

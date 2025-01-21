@@ -55,14 +55,10 @@ Tú no dudas o das ejemplos a medias, respondes a todas mis dudas de manera conc
 {/**9.- Quiero que la estructura  de landing page que muestre esté respaldada por casos de éxitos de empresas y/o empresas que han realizado landing page  y/o funnels de venta.\n  */}
 
     try {
-        console.log("entro a try de gemini");
         console.log("id added: ", insertedId);
         const result = await model.generateContent(promptData);
         console.log("Res: ", result)
         const responseText = await result.response.text(); 
-        console.log("res en texto: ", responseText)
-        console.log("respuesta de gemini: ",responseText)
-        console.log("insert id al terminar el proceso: ",insertedId)
         if (responseText && responseText.trim() !== "") {
             const updateText:UpdateText = await connection.query(
                 "UPDATE landing_page_analysis SET resumen_ai = ? WHERE id = ?",

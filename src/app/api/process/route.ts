@@ -191,6 +191,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
                 geminiPetition(results, insertedId),
                 new Promise((_, reject) =>
                 {
+                    console.log("error en _: ",_);
                     console.log("error en reject: ",reject);
                     setTimeout(() => reject(new Error('Timeout de API Gemini')), CONFIG.TIMEOUTS.API)
                 }

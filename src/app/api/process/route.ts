@@ -199,6 +199,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             const processedResults:ProcessedResult = await Promise.race([
                 geminiPetition(results, insertedId)
             ]) as ProcessedResult;
+            const endTime = Date.now(); // Marca de tiempo al finalizar
+            console.log("Ejecución completada:", new Date(endTime).toISOString());
+            console.log("Duración total (ms):", endTime - startTime);
             console.log("result procesado: ", processedResults)
             if (processedResults.estado === true) {
                 

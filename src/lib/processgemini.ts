@@ -39,7 +39,7 @@ De ahora en adelante llamado: **${websiteOne.title}**. \n
 
 Posteriormente, identifica lo más relevante del contenido en general y extrae la información más importante, luego analiza el contenido de este sitio web: (${websiteTwo.text} \n).De ahora en adelante llamado **${websiteTwo.title}**.\nExtrae la información más importante, una vez hecho ello evalúa la estructura del sitio **${websiteTwo.title}** \n
 Si ambos sitios webs pertenecen al mismo rubro continua, sino es así manda el siguiente mensaje **Los sitios web no pertenecen al mismo rubro.**\n
-Para que una landing page o funnel de venta sea buena y convierta visitantes a clientes potenciales toma en considera	cian los siguientes puntos:\n 
+Estructura la landing page para ${websiteOne.title} considerando los siguientes puntos para que sea efectiva y convierta visitantes a clientes potenciales:\n 
  1.- Los CTAs tienen que ser claras, acorde al rubro de **${websiteOne.title}** y moderadas ya que un 68,2% de landing page o funnels de venta que tienen más de 5 CTAs  no convierten y sólo 1 CTA convierte más. Recomienda un solo CTA cuando sea necesario  y de acuerdo al criterio  que puedas tener*.\n
  2.- Si **${websiteOne.title}** vende productos puedes tocar el problema que solucionará mi producto de un usuario en específico, para mejorar esto añade CTAs que incentiven a realizar una acción. Sé claro en mostrar ofertas, que tenga un solo propósito, toda la landing page o funnel de venta a un solo propósito.\n3.- Los textos tienen muy claros, atractivos, cortos, descriptivos y directos.\n
 4.- Si es necesario, de acuerdo al rubro que tenga: **${websiteOne.title}**, recomienda poner una imagen o vídeo principal considerando la regla de los 5 segundos ya que la sección principal será crucial para que el usuario se quede o se vaya de: **${websiteOne.title}**, te muestro un ejemplo para que evalúes si puedes recomendar una imagen o un vídeo: Si **${websiteOne.title}**, es un restaurant recomienda una imagen de una comida que sea apetitosa, de acuerdo a este contexto avaluarás para cada rubro la recomendación de imagen o video. \n
@@ -50,7 +50,7 @@ Para que una landing page o funnel de venta sea buena y convierta visitantes a c
 Teniendo como referencia **${websiteTwo.title}**. La estructura de la  landing page  que vas a estructurar debe generar resultados convirtiendo visitantes a clientes potenciales.\n
 
 
-
+Tú no dudas o das ejemplos a medias, respondes a todas mis dudas de manera concisa.
 `;
 {/**9.- Quiero que la estructura  de landing page que muestre esté respaldada por casos de éxitos de empresas y/o empresas que han realizado landing page  y/o funnels de venta.\n  */}
 

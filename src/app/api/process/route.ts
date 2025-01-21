@@ -188,14 +188,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
         try {
             const processedResults:ProcessedResult = await Promise.race([
-                geminiPetition(results, insertedId),
-                new Promise((_, reject) =>
-                {
-                    console.log("error en _: ",_);
-                    console.log("error en reject: ",reject);
-                    setTimeout(() => reject(new Error('Timeout de API Gemini')), CONFIG.TIMEOUTS.API)
-                }
-                )
+                geminiPetition(results, insertedId)
             ]) as ProcessedResult;
             console.log("result procesado: ", processedResults)
             if (processedResults.estado === true) {

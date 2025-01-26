@@ -36,7 +36,7 @@ try {
 Actúa como un experto en la estructuración de landing page y funnels de venta, con más de 10 años de experiencia. \n
 Analiza la estructura solo estructura a nivel de contenido de mi sitio web: (${websiteOne.text} \n) .
 De ahora en adelante llamado: **${websiteOne.title}**. \n
-
+Tu respuesta debe ser en el idioma de ${websiteOne.title}. \n
 Posteriormente, identifica lo más relevante del contenido en general y extrae la información más importante, luego analiza el contenido de este sitio web: (${websiteTwo.text} \n).De ahora en adelante llamado **${websiteTwo.title}**.\nExtrae la información más importante, una vez hecho ello evalúa la estructura del sitio **${websiteTwo.title}** \n
 Si ambos sitios webs no pertenecen al mismo rubro, manda el siguiente mensaje **Los sitios web no pertenecen al mismo rubro  y termina el proceso acá.**\n
 Si ambos sitios web pertenecen al mismor rubro entonces, estructura la landing a nivel contenido page para ${websiteOne.title} considerando los siguientes puntos para que sea efectiva y convierta visitantes a clientes potenciales:\n 

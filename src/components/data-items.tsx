@@ -10,7 +10,7 @@ import LoginButton from "./LoginButton";
 interface propsInput {
   data?: string,
   setData: React.Dispatch<React.SetStateAction<string>>; // Asegúrate de que sea Dispatch<SetStateAction<string>>
-  propsUbication?: string
+  propsUbication?: string;
   dataLanguage: {principalView:{actionSubmit:string, labelOne:string, labelTwo: string, placeHolderOne:string, placeholderTwo:string}}
 }
 export default function InputsLayer({ setData, propsUbication, dataLanguage }: propsInput) {

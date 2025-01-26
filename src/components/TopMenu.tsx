@@ -1,18 +1,24 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import LoginButton from './LoginButton';
 import { useAuthStore } from '@/store/authStore';
 import { AuthSession } from '@/types/auth';
 import { DropdownMenuDemo } from './DownProfile';
+import { Button } from './ui/button';
 
-export const TopMenu: React.FC = () => {
+type Language = "es" | "en";
+
+interface NavBarProps {
+  language: string;
+  setLanguage: Dispatch<SetStateAction<Language>>;
+  dataLanguage: { yourAccount: {principalAccount:string, myAccount:string,logout:string} }
+}
+export const TopMenu: React.FC<NavBarProps> = ({dataLanguage, language, setLanguage}) => {
   const session: AuthSession | null = useAuthStore((state) => state.session);
   const signOut = useAuthStore((state) => state.signOut);
-
   const handleLogout = async () => {
     await signOut();
-    console.log('Sesión cerrada.');
   };
 
   return (
@@ -29,11 +35,20 @@ export const TopMenu: React.FC = () => {
           <Link className="text-xl md:text-2xl font-bold text-terracotta" href={'/'}>
             LandingLab
           </Link>
+          <Button
+                className="fixed left-4 md:left-10 z-30 font-bold bottom-12 text-[10px] md:text-sm md:bottom-20"
+                    onClick={() => {
+                        setLanguage(language === "es" ? "en" : "es");
+                    }}
+                >
+
+                    {language === 'es' ? 'EN' : 'ES'}
+                </Button>
         </div>
         <div className="flex items-center gap-2">
           {session?.user ? ( // Verificamos si user no es null
             <>
-              <DropdownMenuDemo handleLogout={handleLogout} username={session.user.name} profile={session.user.photoURL || '/logo-landing.webp'}/>
+              <DropdownMenuDemo dataLanguage={dataLanguage} handleLogout={handleLogout} username={session.user.name} profile={session.user.photoURL || '/logo-landing.webp'}/>
             </>
           ) : (
             <LoginButton provider="google" className="shadow-sm border-gray-300" />

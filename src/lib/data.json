@@ -1,0 +1,39 @@
+{
+    "es": {
+        "title" : " Mejora tu <strong className='font-extrabold'>Landing page</strong> para <strong className='font-extrabold'>convertir visitantes en clientes</strong>",
+        "description": "Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con <strong>AI.</strong>",
+        "principalView": {
+            "labelOne": "Enlace de tu sitio web",
+            "placeHolderOne" :"https://tusitioweb.com/",
+            "labelTwo":  "Enlace del sitio web de tu competencia",
+            "placeholderTwo": "https://sitiowebdetucompetencia.com/",
+            "actionSubmit": "Analizar sitio web"
+        },
+        "yourAccount": {
+            "principalAccount": "Tu cuenta",
+            "myAccount": "Mi cuenta",
+            "logout": "Salir"
+        },
+        "btnSuggestion": "Solicita una nueva función",
+        "howUse": "¿Cómo funciona?"
+
+    },
+    "en":{
+        "title" : "Improve you <strong className='font-extrabold'>Landing page</strong> to <strong className='font-extrabold'> convert visitors into customers</strong>",
+        "description": "Analyze your website, compare it with your competitors in seconds and create the best landing page, with our powerful AI-powered tool.",
+        "principalView": {
+            "labelOne": "Link to your website",
+            "placeHolderOne" :"https://yourwebsite.com/",
+            "labelTwo":  "Link to your competitor's website",
+            "placeholderTwo": "https://yourcompetitorwebsite.com/",
+            "actionSubmit": "Analyze website"
+        },
+        "yourAccount": {
+            "principalAccount": "Your account",
+            "myAccount": "My account",
+            "logout": "Logout"
+        },
+        "btnSuggestion": "Request a new feature",
+        "howUse": "How does it work?" 
+    }
+}

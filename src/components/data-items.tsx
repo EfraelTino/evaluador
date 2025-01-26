@@ -11,10 +11,12 @@ interface propsInput {
   data?: string,
   setData: React.Dispatch<React.SetStateAction<string>>; // Asegúrate de que sea Dispatch<SetStateAction<string>>
   propsUbication?: string
+  dataLanguage: {principalView:{actionSubmit:string, labelOne:string, labelTwo: string, placeHolderOne:string, placeholderTwo:string}}
 }
-export default function InputsLayer({ setData, propsUbication }: propsInput) {
+export default function InputsLayer({ setData, propsUbication, dataLanguage }: propsInput) {
+
   const session: AuthSession | null = useAuthStore((state) => state.session);
-  console.log("Session: ", session)
+
   const [firstUrl, setFirstUrl] = useState<string>("");
   const [secondUrl, setSecondUrl] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -22,11 +24,9 @@ export default function InputsLayer({ setData, propsUbication }: propsInput) {
   //const [selectValue, setSelectValue] = useState<number>(0);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFirstUrl(e.target.value)
-    console.log(e.target.value)
   }
   const handleChangeSecond = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSecondUrl(e.target.value)
-    console.log(e.target.value)
   }
   //  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
   ///  const valueitem = parseInt(e.target.value);
@@ -44,13 +44,11 @@ export default function InputsLayer({ setData, propsUbication }: propsInput) {
         return setError('Ingresa una url válida');
       }
       const response = await axios.post("/api/process", { urls: [firstUrl, secondUrl], procesador: 1, userid: session?.user?.id });
-      console.log("RES FRONTEND: ", response);
-      console.log(response.status);
+
       if (response.status === 200) {
         return setData(response.data.results)
       }
-    } catch (e) {
-      console.log(" error en catch:", e)
+    } catch {
       return setError("Error, intenta de nuevo.")
 
     } finally {
@@ -62,13 +60,13 @@ export default function InputsLayer({ setData, propsUbication }: propsInput) {
     <form action="" onSubmit={handleSubmit} className="space-y-4 mt-10 max-w-4xl w-full ">
       <div className={propsUbication}>
         <div className="col-span-2 space-y-2">
-          <label htmlFor="email" className="font-semibold text-sm lg:text-lg">Enlace de tu sitio web</label>
-          <Input type="text" id="url" placeholder="Enlace de tu sitio web" className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-terracotta focus:ring-0 h-11 resize-none bg-white" onChange={handleChange} value={firstUrl} />
+          <label htmlFor="email" className="font-semibold text-sm lg:text-lg">{dataLanguage?.principalView?.labelOne}</label>
+          <Input type="text" id="url" placeholder={dataLanguage?.principalView?.placeHolderOne} className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-terracotta focus:ring-0 h-11 resize-none bg-white" onChange={handleChange} value={firstUrl} />
 
         </div>
         <div className="col-span-2 space-y-2">
-          <label htmlFor="email" className="font-semibold text-sm lg:text-lg">Enlace del sitio web de tu competencia</label>
-          <Input type="text" id="secondurl" placeholder="Enlace de sitio web de tu competencia" className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-terracotta focus:ring-0 h-11 resize-none bg-white" onChange={handleChangeSecond} value={secondUrl} />
+          <label htmlFor="email" className="font-semibold text-sm lg:text-lg">{dataLanguage?.principalView?.labelTwo}</label>
+          <Input type="text" id="secondurl" placeholder={dataLanguage?.principalView?.placeholderTwo} className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-terracotta focus:ring-0 h-11 resize-none bg-white" onChange={handleChangeSecond} value={secondUrl} />
         </div>
         {/*   <div className="col-span-1 space-y-2 w-full">
                     <label htmlFor="email" className="font-semibold text-base lg:text-lg">Seleccionar AI</label>
@@ -91,7 +89,7 @@ export default function InputsLayer({ setData, propsUbication }: propsInput) {
             </>
 
           ) :
-            session?.user ? (<Button className="w-full md:w-auto px-6 py-6 flex justify-center items-center gap-2 text-base text-white bg-terracotta hover:bg-terracotta-600 border-[0.5px] border-terracotta-500 rounded-lg transition duration-200 ease-in-out">Analizar sitio web</Button>) : (
+            session?.user ? (<Button className="w-full md:w-auto px-6 py-6 flex justify-center items-center gap-2 text-base text-white bg-terracotta hover:bg-terracotta-600 border-[0.5px] border-terracotta-500 rounded-lg transition duration-200 ease-in-out">{dataLanguage?.principalView?.actionSubmit}</Button>) : (
               <LoginButton provider="google" className="shadow-sm border-gray-300" />
 
             )

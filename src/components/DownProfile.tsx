@@ -19,10 +19,13 @@ interface DropdownMenuDemoProps {
     handleLogout: () => Promise<void>;
     profile: string;
     username: string;
+    dataLanguage: {
+        yourAccount: {principalAccount:string, myAccount:string,logout:string}
+    }
 }
 import Image from "next/image"
 
-export const DropdownMenuDemo: React.FC<DropdownMenuDemoProps> = ({ handleLogout, profile, username }) => {
+export const DropdownMenuDemo: React.FC<DropdownMenuDemoProps> = ({ handleLogout, profile, username, dataLanguage }) => {
     return (
         <DropdownMenu >
             <DropdownMenuTrigger asChild>
@@ -34,10 +37,10 @@ export const DropdownMenuDemo: React.FC<DropdownMenuDemoProps> = ({ handleLogout
                         height={50}
                         className="rounded-full w-5 h-5 object-cover"
                     />
-                    Tu cuenta <ChevronsUpDown /> </Button>
+                    {dataLanguage?.yourAccount.principalAccount} <ChevronsUpDown /> </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                <DropdownMenuLabel>{dataLanguage?.yourAccount.myAccount}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem>
@@ -48,7 +51,7 @@ export const DropdownMenuDemo: React.FC<DropdownMenuDemoProps> = ({ handleLogout
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                     <LogOut />
-                    <span>Salir</span>
+                    <span>{dataLanguage?.yourAccount.logout}</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

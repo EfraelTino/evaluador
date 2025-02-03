@@ -6,9 +6,10 @@ import { Button } from './button';
 interface Props {
   data: string;
   setData: Dispatch<SetStateAction<string>>;
+  language:string;
 }
 
-const ProcesoText: React.FC<Props> = ({ data, setData }) => {
+const ProcesoText: React.FC<Props> = ({ data, setData, language }) => {
   const handleCleanUp = () => {
     setData("");
   };
@@ -20,7 +21,8 @@ const ProcesoText: React.FC<Props> = ({ data, setData }) => {
           onClick={handleCleanUp} 
           className="w-full md:w-auto px-6 md:py-6 flex justify-center items-center gap-2 text-lg text-white bg-terracotta hover:bg-terracotta-600 border-[0.5px] border-terracotta-500 rounded-lg transition duration-200 ease-in-out fade-in"
         >
-          Nuevo <PlusIcon />
+          {language  === 'en'? 'New' : 'Nuevo'}
+           <PlusIcon />
         </Button>
       </div>
       

@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 interface LoginButtonProps {
   provider: 'google';
   className?: string;
-  dataLanguage: {dataAction:string};
+  dataLanguage?: {dataAction:string};
 }
 
 const LoginButton: React.FC<LoginButtonProps> = ({ provider, className = '', dataLanguage }) => {

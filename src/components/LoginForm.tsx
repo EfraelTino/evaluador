@@ -15,7 +15,7 @@ export const LoginForm: React.FC = () => {
       </div>
 
       <div className="space-y-3">
-        <LoginButton 
+        <LoginButton
           provider="google"
           className="shadow-sm border-gray-300"
         />

@@ -118,7 +118,7 @@ export default function Home() {
           <h1 className="max-w-4xl text-2xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tighter text-center" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.title || '' }} />
           <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto text-center mt-2 md:mt-6" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.description || '' }} />
           {
-            !data ? (
+            data ? (
 
               <ProcesoText data={data} setData={setData} language={language} />
 

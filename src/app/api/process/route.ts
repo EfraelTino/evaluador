@@ -10,13 +10,17 @@ interface ExtractionResult {
     url: string;
     text: string;
     error: string | null;
+    lang: string;
 }
 
 interface RequestBody {
     urls: string[];
-    userid?:string;
+    userid?: string;
     procesador: number;
+    language:string;
 }
+
+
 
 interface ProcessedResult {
     summary?: string;
@@ -24,9 +28,9 @@ interface ProcessedResult {
     keywords?: string[];
     mainPoints?: string[];
     error?: string;
-    estado?:boolean;
-    text?:string;
-    title?:string | null; 
+    estado?: boolean;
+    text?: string;
+    title?: string | null;
 }
 
 interface ApiResponse {
@@ -35,9 +39,9 @@ interface ApiResponse {
     extract?: ExtractionResult[];
     error?: string;
     processingTime?: number;
-    
+
 }
-interface InsertUrl{
+interface InsertUrl {
     insertId: number;
 }
 // Configuración
@@ -105,13 +109,14 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
         }
 
         if (isBlacklisted(url)) {
-            return { url, text: "Dominio bloqueado", error: "Dominio en lista negra" };
+            return { url, text: "Dominio bloqueado", error: "Dominio en lista negra", lang: "" };
         }
 
         const { data } = await axios.get(url, { timeout: CONFIG.TIMEOUTS.PAGE_LOAD });
-
-        // Usar Cheerio para parsear el HTML
         const $ = cheerio.load(data);
+        const lang = $('html').attr('lang') || 'unknown';
+        const idiomadetectado = detectLanguage(lang);
+        // Usar Cheerio para parsear el HTML
 
         // Excluir <script>, <style>, y otros elementos no deseados antes de extraer texto
         $('script, style, noscript, iframe').remove();
@@ -130,16 +135,17 @@ async function extractTextWithCheerio(url: string): Promise<ExtractionResult> {
         const cleanedText = cleanText(text);
 
         if (!cleanedText) {
-            return { url, text: "", error: "No se encontró contenido de texto" };
+            return { url, text: "", error: "No se encontró contenido de texto", lang: "" };
         }
 
-        return { url, text: cleanedText, error: null };
+        return { url, text: cleanedText, error: null, lang: idiomadetectado, };
 
     } catch (error) {
         console.error(`Error procesando ${url}:`, error);
         return {
             url,
             text: "",
+            lang: "",
             error: error instanceof Error ? error.message : "Error desconocido"
         };
     }
@@ -151,8 +157,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
     try {
         const body = await request.json() as RequestBody;
+        console.log(body);
         const urls = Array.isArray(body?.urls) ? body.urls : null;
-        const userid= body?.userid;
+        const userid = body?.userid;
+        const language = body?.language;
 
         if (!Array.isArray(urls) || urls.length === 0) {
             return NextResponse.json({
@@ -161,7 +169,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
             }, { status: 400 });
         }
 
-        const insertUrls:InsertUrl = await connection.query(
+        const insertUrls: InsertUrl = await connection.query(
             "INSERT INTO landing_page_analysis (url_1, user_id, ai_used) VALUES (?, ?, ?)",
             [JSON.stringify(urls), userid, 1]
         );
@@ -181,14 +189,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
         const results = await Promise.all(validUrls.map(async (url) => {
             const extraction = await extractTextWithCheerio(url);
+
             const title = await extractTitle(url);
             return {
                 title,
                 url: extraction.url,
                 text: extraction.text,
-                error: extraction.error
+                error: extraction.error,
+                lang: extraction.lang,
             };
-          }));
+        }));
         console.log("res de la extraccion del url: ", results)
         await connection.query("UPDATE landing_page_analysis SET resume = ? WHERE id = ?", [
             JSON.stringify(results),
@@ -196,15 +206,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         ]);
 
         try {
-            const processedResults:ProcessedResult = await Promise.race([
-                geminiPetition(results, insertedId)
+            const processedResults: ProcessedResult = await Promise.race([
+                geminiPetition(results, insertedId, language)
             ]) as ProcessedResult;
             const endTime = Date.now(); // Marca de tiempo al finalizar
             console.log("Ejecución completada:", new Date(endTime).toISOString());
             console.log("Duración total (ms):", endTime - startTime);
             console.log("result procesado: ", processedResults)
             if (processedResults.estado === true) {
-                
+
                 return NextResponse.json({
                     message: "Procesamiento completado con éxito",
                     results: processedResults.text,
@@ -212,11 +222,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
                     processingTime: Date.now() - startTime
                 });
             } else {
+                console.log("error");
                 throw new Error("Gemini no pudo procesar el contenido");
             }
         } catch (error) {
             console.error("Error en procesamiento Gemini:", error);
-            throw new Error("Falló el procesamiento en Gemini");
+          throw new Error("Falló el procesamiento en Gemini");
         }
     } catch (error) {
         console.error("Error en el procesamiento:", error);
@@ -230,20 +241,33 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
 
 
-async function extractTitle(url:string) {
+async function extractTitle(url: string) {
     try {
-      // Realiza una solicitud HTTP GET al sitio web
-      const { data } = await axios.get(url);
-  
-      // Carga el HTML en Cheerio
-      const $ = cheerio.load(data);
-  
-      // Selecciona la etiqueta <title> y obtiene su texto
-      const title = $('title').text();
-  
-      return title;
+        // Realiza una solicitud HTTP GET al sitio web
+        const { data } = await axios.get(url);
+
+        // Carga el HTML en Cheerio
+        const $ = cheerio.load(data);
+
+        // Selecciona la etiqueta <title> y obtiene su texto
+        const title = $('title').text();
+
+        return title;
     } catch (error) {
-      console.error(`Error al extraer el título de ${url}:`, error);
-      return null;
+        console.error(`Error al extraer el título de ${url}:`, error);
+        return null;
     }
-  }
+}
+
+function detectLanguage(lang: string): string {
+    // Si el atributo lang está presente y es válido
+    if (lang.startsWith('en')) {
+        return 'en';  // Asociar todas las variantes de inglés a 'en'
+    }
+
+    if (lang.startsWith('es')) {
+        return 'es';  // Asociar todas las variantes de español a 'es'
+    }
+
+    return 'unknown';  // Si no es inglés ni español
+}

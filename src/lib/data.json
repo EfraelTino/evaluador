@@ -1,7 +1,9 @@
 {
     "es": {
-        "title" : " Mejora tu <strong className='font-extrabold'>Landing page</strong> para <strong className='font-extrabold'>convertir visitantes en clientes</strong>",
+        "title" : " Mejora tu <strong className='font-bold'>Landing page</strong> para <strong className='font-bold'>convertir visitantes en clientes</strong>",
         "description": "Analiza tu sitio web, compáralo con el de tu competencia en segundos y arma la mejor landing page, con nuestra potente herramienta impulsada con <strong>AI.</strong>",
+        "dataAI":"Potenciado con Inteligencia Artificial",
+        "dataAction": "Continuar con Google",
         "principalView": {
             "labelOne": "Enlace de tu sitio web",
             "placeHolderOne" :"https://tusitioweb.com/",
@@ -19,8 +21,10 @@
 
     },
     "en":{
-        "title" : "Improve you <strong className='font-extrabold'>Landing page</strong> to <strong className='font-extrabold'> convert visitors into customers</strong>",
+        "title" : "Improve you <strong className='font-bold'>Landing page</strong> to <strong className='font-bold'> convert visitors into customers</strong>",
         "description": "Analyze your website, compare it with your competitors in seconds and create the best landing page, with our powerful AI-powered tool.",
+        "dataAI":"Powered by Artificial Intelligence",
+        "dataAction": "Continue with Google",
         "principalView": {
             "labelOne": "Link to your website",
             "placeHolderOne" :"https://yourwebsite.com/",

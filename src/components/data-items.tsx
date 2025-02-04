@@ -136,7 +136,7 @@ export default function InputsLayer({ setData, propsUbication, dataLanguage, lan
           ) :
             session?.user ? (<Button
 
-              className="bg-blue-600 hover:bg-blue-500 text-white w-full md:w-auto px-4 h-10 md:text-md shadow-L">{dataLanguage?.principalView?.actionSubmit}  <ArrowRight className="ml-2 w-5 h-5" /></Button>) : (
+              className="bg-blue-600 hover:bg-blue-500 text-white w-full md:w-auto px-4 h-10 md:text-md shadow-L">{dataLanguage?.principalView?.actionSubmit}  <ArrowRight className="w-5 h-5" /></Button>) : (
               <LoginButton dataLanguage={dataLanguage} provider="google" className="shadow-sm border-gray-300" />
 
             )

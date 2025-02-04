@@ -108,7 +108,7 @@ export default function Home() {
             <span className="text-[10px] font-medium">{dataLanguage[language]?.dataAI}</span>
           </div>
           <h1 className="max-w-4xl text-2xl md:text-3xl lg:text-5xl font-bold leading-tight tracking-tighter text-center" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.title || '' }} />
-          <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto text-center mt-2 md:mt-6" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.description || '' }} />
+          <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto text-center mt-2 md:mt-62" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.description || '' }} />
           {
             data ? (
 

@@ -1,7 +1,6 @@
-import Image from 'next/image';
+
 import Link from 'next/link';
 import React, { Dispatch, SetStateAction } from 'react';
-import LoginButton from './LoginButton';
 import { useAuthStore } from '@/store/authStore';
 import { AuthSession } from '@/types/auth';
 import { DropdownMenuDemo } from './DownProfile';

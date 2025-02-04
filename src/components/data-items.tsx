@@ -69,8 +69,8 @@ export default function InputsLayer({ setData, propsUbication, dataLanguage, lan
       <div className={propsUbication}>
         <div className="col-span-4">
           <label htmlFor="email" className="font-semibold text-sm lg:text-lg tracking-tighter">{dataLanguage?.principalView?.objetivo}</label>
-          <Select onValueChange={(value) => setSelectedValue(value)}>
-            <SelectTrigger className="w-full">
+          <Select onValueChange={(value) => setSelectedValue(value)} >
+            <SelectTrigger className="w-full focus:ring-1  active:ring-1 focus:ring-blue-600  ring-blue-600">
               <SelectValue placeholder="Selecciona un objetivo" />
             </SelectTrigger>
             <SelectContent>

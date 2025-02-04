@@ -13,7 +13,7 @@ export default {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			ivory: 'rgb(242, 241, 236)',
-  			terracotta: 'rgb(164, 81, 57)',
+  			terracotta: '#3b82f6',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'

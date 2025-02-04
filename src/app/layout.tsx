@@ -24,7 +24,7 @@ export default function RootLayout({
         <link rel="icon" type="image/x-icon" href="/LANDINGLAB.png" />
       </head>
       <body
-        className={`${inter.className} ${'antialiased min-h-screen  bg-ivory'}`}
+        className={`${inter.className} ${'antialiased min-h-screen  bg-'}`}
       >
         {children}
         <Toaster

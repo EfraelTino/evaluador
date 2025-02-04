@@ -12,7 +12,7 @@ import Script from "next/script";
 import dataLanguage from '@/lib/data.json';
 
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Sparkles, X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 // Declaración del elemento personalizado
 type Language = "es" | "en";
@@ -85,16 +85,8 @@ export default function Home() {
       // Se carga después de que el contenido de la página se haya cargado
       />
       <div className="fixed left-4 md:left-10 bottom-2 md:bottom-10 flex z-10 gap-2">
-        <Button onClick={handleModal} className="text-white  text-[10px] bg-terracotta  font-bold ">{dataLanguage[language]?.btnSuggestion}</Button>
-        <Button
-          className="font-bold text-[10px] "
-          onClick={() => {
-            setLanguage(language === "es" ? "en" : "es");
-          }}
-        >
-          <RefreshCw />
-          {language === 'es' ? 'EN' : 'ES'}
-        </Button>
+        <Button onClick={handleModal} className="text-white  text-[10px] bg-blue-600  font-bold ">{dataLanguage[language]?.btnSuggestion}</Button>
+
       </div>
       {
         suggesstion && <div className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 flex justify-center items-center">
@@ -109,13 +101,13 @@ export default function Home() {
 
         </div>
       }
-      <section className="flex justify-center items-center h-full py-20 px-6 md:p-6 fade-in ">
-        <div className="max-w-4xl flex flex-col justify-center items-center ">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-sm border mb-8">
-            <Sparkles className="w-4 h-4 text-[#A15C3E]" />
+      <section className="flex justify-center items-center h-full py-10 px-6 md:py-16 fade-in ">
+        <div className="md:max-w-4xl flex flex-col justify-center items-center ">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-lg mb-2 shadow-blue-100 ">
+            <Sparkles className="w-4 h-4 text-blue-600" />
             <span className="text-[10px] font-medium">{dataLanguage[language]?.dataAI}</span>
           </div>
-          <h1 className="max-w-4xl text-2xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tighter text-center" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.title || '' }} />
+          <h1 className="max-w-4xl text-2xl md:text-3xl lg:text-5xl font-bold leading-tight tracking-tighter text-center" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.title || '' }} />
           <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto text-center mt-2 md:mt-6" dangerouslySetInnerHTML={{ __html: dataLanguage[language]?.description || '' }} />
           {
             data ? (
@@ -124,7 +116,11 @@ export default function Home() {
 
             ) :
 
-              <Card className=" mx-auto w-full p-6 mt-4 md:mt-12 bg-white backdrop-blur-sm md:mb-20">
+              <Card className="  w-full py-6 px-3 md:p-6 mt-4  md:mt-12 bg-white backdrop-blur-sm md:mb-20">
+                {/**
+                 * SECTOR
+                 * OBJETIVO - CAPTAR LEADS, CONSEGUIR CITAS
+                 */}
                 <InputsLayer data={data} setData={setData} language={language} dataLanguage={dataLanguage[language]} propsUbication="grid grid-cols-1 md:grid-cols-4 gap-4" />
               </Card>
           }

@@ -18,6 +18,7 @@ interface RequestBody {
     userid?: string;
     procesador: number;
     language:string;
+    objetivo:string;
 }
 
 
@@ -161,6 +162,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         const urls = Array.isArray(body?.urls) ? body.urls : null;
         const userid = body?.userid;
         const language = body?.language;
+        const objetivo= body?.objetivo;
 
         if (!Array.isArray(urls) || urls.length === 0) {
             return NextResponse.json({
@@ -170,8 +172,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         }
 
         const insertUrls: InsertUrl = await connection.query(
-            "INSERT INTO landing_page_analysis (url_1, user_id, ai_used) VALUES (?, ?, ?)",
-            [JSON.stringify(urls), userid, 1]
+            "INSERT INTO landing_page_analysis (url_1, user_id, ai_used, objetivo) VALUES (?, ?, ?, ?)",
+            [JSON.stringify(urls), userid, 1, objetivo]
         );
 
         if (!insertUrls.insertId) {
@@ -207,7 +209,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
         try {
             const processedResults: ProcessedResult = await Promise.race([
-                geminiPetition(results, insertedId, language)
+                geminiPetition(results, insertedId, language, objetivo)
             ]) as ProcessedResult;
             const endTime = Date.now(); // Marca de tiempo al finalizar
             console.log("Ejecución completada:", new Date(endTime).toISOString());

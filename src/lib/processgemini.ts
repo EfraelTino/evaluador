@@ -15,7 +15,7 @@ interface PropsGemini {
 interface UpdateText {
     affectedRows: number
 }
-export async function geminiPetition(data: PropsGemini[], insertedId: number, language: string) {
+export async function geminiPetition(data: PropsGemini[], insertedId: number, language: string, objetivo:string) {
 
 
     console.log("data gemini cambiado: ", data);
@@ -40,6 +40,8 @@ export async function geminiPetition(data: PropsGemini[], insertedId: number, la
             If the content of ${websiteOne.title} is in Spanish, then it responds in Spanish. If it is in English, then it responds in English. \n
             Acts as an expert in structuring landing pages and sales funnels, with more than 10 years of experience. \n
             
+            The goal of the landing page is:${objetivo}.\n 
+
             Analyzes the structure only at the content level of my website: (${websiteOne.text} \n) .
             From now on called: **${websiteOne.title}**. \n
             
@@ -67,7 +69,7 @@ export async function geminiPetition(data: PropsGemini[], insertedId: number, la
             Si el contenido de ${websiteOne.title} es en español, entonces responde en español. Si está en inglés entonces responde en inglés. \n
             Actúa como un experto en la estructuración de landing page y funnels de venta, con más de 10 años de experiencia. \n
             
-            
+            El objetivo de la landing page es: ${objetivo}.\n 
             Analiza la estructura solo estructura a nivel de contenido de mi sitio web: (${websiteOne.text}). \n
             De ahora en adelante llamado: **${websiteOne.title}**, identifica lo más relevante del contenido en general y extraeo la información más importante. \n
             

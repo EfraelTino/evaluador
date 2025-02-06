@@ -103,3 +103,7 @@
   animation: fadeIn 1s ease-in-out forwards;
   animation-delay: 0.5s;
 }
+
+.bg-results{
+  background-image: url('https://cdn.prod.website-files.com/66f3f2f43cc7b1de899bf21f/671a45f3f04a8bbe947de4b0_submit_button_trick.png');
+}

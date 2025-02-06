@@ -14,11 +14,12 @@ interface ExtractionResult {
 }
 
 interface RequestBody {
-    urls: string[];
+    url: string;
     userid?: string;
     procesador: number;
     language:string;
     objetivo:string;
+    productOrService:string;
 }
 
 
@@ -40,6 +41,7 @@ interface ApiResponse {
     extract?: ExtractionResult[];
     error?: string;
     processingTime?: number;
+    productOrService?:string;
 
 }
 interface InsertUrl {
@@ -159,48 +161,49 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     try {
         const body = await request.json() as RequestBody;
         console.log(body);
-        const urls = Array.isArray(body?.urls) ? body.urls : null;
+        const url = body?.url;
         const userid = body?.userid;
         const language = body?.language;
         const objetivo= body?.objetivo;
+        const productOrService = body?.productOrService;
 
-        if (!Array.isArray(urls) || urls.length === 0) {
+        if (!url) {
+            console.log("validacion")
+
             return NextResponse.json({
                 message: "Error de validación",
-                error: "Se requiere un array de URLs"
+                error: "Se requiere una URL válida"
             }, { status: 400 });
         }
 
-        const insertUrls: InsertUrl = await connection.query(
-            "INSERT INTO landing_page_analysis (url_1, user_id, ai_used, objetivo) VALUES (?, ?, ?, ?)",
-            [JSON.stringify(urls), userid, 1, objetivo]
+        const insertUrl: InsertUrl = await connection.query(
+            "INSERT INTO landing_page_analysis (url_1, user_id, ai_used, objetivo, descService) VALUES (?, ?, ?, ?, ?)",
+            [url, userid, 1, objetivo, productOrService]
         );
+        console.log("insert: ", insertUrl);
+        if (!insertUrl.insertId) {
+            console.log("no se pudo insertar");
 
-        if (!insertUrls.insertId) {
             throw new Error("No se pudo obtener el ID del registro insertado");
         }
 
-        const insertedId = insertUrls.insertId;
-        console.log("El ID del registro insertado es:", insertedId);
+        const insertedId = insertUrl.insertId;
 
-        const validUrls = urls.filter(isValidUrl).slice(0, CONFIG.LIMITS.MAX_URL_COUNT);
-
-        if (validUrls.length === 0) {
-            throw new Error("No se proporcionaron URLs válidas");
+        if (!isValidUrl(url)) {
+            throw new Error("No se proporcionó una URL válida");
         }
 
-        const results = await Promise.all(validUrls.map(async (url) => {
-            const extraction = await extractTextWithCheerio(url);
+        const extraction = await extractTextWithCheerio(url);
+        const title = await extractTitle(url);
 
-            const title = await extractTitle(url);
-            return {
-                title,
-                url: extraction.url,
-                text: extraction.text,
-                error: extraction.error,
-                lang: extraction.lang,
-            };
-        }));
+
+        const results = {
+            title,
+            url: extraction.url,
+            text: extraction.text,
+            error: extraction.error,
+            lang: extraction.lang,
+        };
         console.log("res de la extraccion del url: ", results)
         await connection.query("UPDATE landing_page_analysis SET resume = ? WHERE id = ?", [
             JSON.stringify(results),
@@ -208,28 +211,25 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         ]);
 
         try {
-            const processedResults: ProcessedResult = await Promise.race([
-                geminiPetition(results, insertedId, language, objetivo)
-            ]) as ProcessedResult;
-            const endTime = Date.now(); // Marca de tiempo al finalizar
+            const processedResult: ProcessedResult = await geminiPetition([results], insertedId, language, objetivo, productOrService) as ProcessedResult;
+            const endTime = Date.now();
             console.log("Ejecución completada:", new Date(endTime).toISOString());
             console.log("Duración total (ms):", endTime - startTime);
-            console.log("result procesado: ", processedResults)
-            if (processedResults.estado === true) {
+            console.log("Resultado procesado: ", processedResult);
 
+            if (processedResult.estado === true) {
                 return NextResponse.json({
                     message: "Procesamiento completado con éxito",
-                    results: processedResults.text,
-                    extract: results,
+                    result: processedResult.text,
+                    extract: [results],
                     processingTime: Date.now() - startTime
                 });
             } else {
-                console.log("error");
                 throw new Error("Gemini no pudo procesar el contenido");
             }
         } catch (error) {
             console.error("Error en procesamiento Gemini:", error);
-          throw new Error("Falló el procesamiento en Gemini");
+            throw new Error("Falló el procesamiento en Gemini");
         }
     } catch (error) {
         console.error("Error en el procesamiento:", error);

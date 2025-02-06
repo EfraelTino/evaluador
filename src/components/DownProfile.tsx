@@ -35,7 +35,7 @@ export const DropdownMenuDemo: React.FC<DropdownMenuDemoProps> = ({ handleLogout
                         alt={`Foto de perfil de ${username}`}
                         width={50}
                         height={50}
-                        className="rounded-full w-5 h-5 object-cover"
+                        className="rounded-full bg-gray-300 w-5 h-5 object-cover"
                     />
                     {dataLanguage?.yourAccount.principalAccount} <ChevronsUpDown /> </Button>
             </DropdownMenuTrigger>

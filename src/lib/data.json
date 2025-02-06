@@ -4,13 +4,14 @@
         "description": "Te ayudamos a planificar la estructura de tu Landing page para maximizar tus resultados.",
         "dataAI": "Potenciado con Inteligencia Artificial",
         "dataAction": "Continuar con Google",
+        "recommend": "Enfócate en un solo producto o servicio para mantener el mensaje claro y aumentar la tasa de conversión. Esto facilita que los usuarios tomen acción rápidamente.",
         "principalView": {
             "objetivo": "¿Cuál es el objetivo de tu landing page?",
-            "labelOne": "Enlace de tu sitio web",
+            "labelOne": "Introduzca la URL de su sitio web",
             "placeHolderOne": "https://tusitioweb.com/",
-            "labelTwo": "Enlace del sitio web de tu competencia",
-            "placeholderTwo": "https://sitiowebdetucompetencia.com/",
-            "actionSubmit": "Obtener Recomendaciones"
+            "labelTwo": "Cuéntanos sobre tu producto a continuación",
+            "placeholderTwo": "Describe brevemente tu producto o servicio",
+            "actionSubmit": "Empezar"
         },
         "objetData": [
             {
@@ -43,13 +44,14 @@
         "description": "We help you plan the structure of your landing page to maximize your results.",
         "dataAI": "Powered by Artificial Intelligence",
         "dataAction": "Continue with Google",
+        "recommend": "Focus on a single product or service to keep the message clear and increase conversion rates. This makes it easier for users to take action quickly.",
         "principalView": {
             "objetivo": "What is the goal of your landing page?",
-            "labelOne": "Link to your website",
+            "labelOne": "Enter your website URL",
             "placeHolderOne": "https://yourwebsite.com/",
-            "labelTwo": "Link to your competitor's website",
-            "placeholderTwo": "https://yourcompetitorwebsite.com/",
-            "actionSubmit": "Analyze website"
+            "labelTwo": "Tell us about your product below",
+            "placeholderTwo": "Briefly describe your product or service",
+            "actionSubmit": "Get result"
         },
         "yourAccount": {
             "principalAccount": "Your account",

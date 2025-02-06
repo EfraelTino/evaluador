@@ -13,7 +13,6 @@ import dataLanguage from '@/lib/data.json';
 
 import { Button } from "@/components/ui/button";
 import { Sparkles, X } from "lucide-react";
-import { Card } from "@/components/ui/card";
 // Declaración del elemento personalizado
 type Language = "es" | "en";
 
@@ -116,13 +115,13 @@ export default function Home() {
 
             ) :
 
-              <Card className="  w-full py-6 px-3 md:p-6 mt-4  md:mt-12 bg-white backdrop-blur-sm md:mb-20">
+              <div className="  w-full   py-10">
                 {/**
                  * SECTOR
                  * OBJETIVO - CAPTAR LEADS, CONSEGUIR CITAS
                  */}
                 <InputsLayer data={data} setData={setData} language={language} dataLanguage={dataLanguage[language]} propsUbication="grid grid-cols-1 md:grid-cols-4 gap-4" />
-              </Card>
+              </div>
           }
         </div>
       </section>

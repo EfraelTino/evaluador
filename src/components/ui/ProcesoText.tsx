@@ -19,7 +19,7 @@ const ProcesoText: React.FC<Props> = ({ data, setData, language }) => {
       <div className="flex justify-end items-center mb-6">
         <Button 
           onClick={handleCleanUp} 
-          className="w-full md:w-auto px-6 md:py-6 flex justify-center items-center gap-2 text-lg text-white bg-terracotta hover:bg-terracotta-600 border-[0.5px] border-terracotta-500 rounded-lg transition duration-200 ease-in-out fade-in"
+          className="text-white bg-blue-600 p-1 text-[10px] md:text-sm md:px-3"
         >
           {language  === 'en'? 'New' : 'Nuevo'}
            <PlusIcon />

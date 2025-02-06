@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { AuthSession } from '@/types/auth';
 import { DropdownMenuDemo } from './DownProfile';
 import { Button } from './ui/button';
-import { Option, RefreshCw } from 'lucide-react';
+import { Globe, Option } from 'lucide-react';
 
 type Language = "es" | "en";
 
@@ -47,7 +47,7 @@ export const TopMenu: React.FC<NavBarProps> = ({ dataLanguage, setLanguage, lang
             setLanguage(language === "es" ? "en" : "es");
           }}
         >
-          <RefreshCw />
+<Globe />
           {language === 'es' ? 'EN' : 'ES'}
         </Button>
         </div>

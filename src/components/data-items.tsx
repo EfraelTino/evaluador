@@ -6,9 +6,11 @@ import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { AuthSession } from "@/types/auth";
 import LoginButton from "./LoginButton";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { CircleHelp, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Textarea } from "./ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 //grid grid-cols-5 gap-4
 interface propsInput {
@@ -16,22 +18,22 @@ interface propsInput {
   setData: React.Dispatch<React.SetStateAction<string>>; // Asegúrate de que sea Dispatch<SetStateAction<string>>
   propsUbication?: string;
   language: string;
-  dataLanguage: { dataAction: string; objetData: { id: string, texto: string }[]; principalView: { actionSubmit: string, labelOne: string, labelTwo: string, placeHolderOne: string, placeholderTwo: string; objetivo: string; } }
+  dataLanguage: { dataAction: string; recommend: string; objetData: { id: string, texto: string }[]; principalView: { actionSubmit: string, labelOne: string, labelTwo: string, placeHolderOne: string, placeholderTwo: string; objetivo: string; } }
 }
 export default function InputsLayer({ setData, propsUbication, dataLanguage, language }: propsInput) {
   console.log(language);
   const session: AuthSession | null = useAuthStore((state) => state.session);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [firstUrl, setFirstUrl] = useState<string>("");
-  const [secondUrl, setSecondUrl] = useState<string>("");
+  const [describe, setDescribe] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setloading] = useState(false);
   //const [selectValue, setSelectValue] = useState<number>(0);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFirstUrl(e.target.value)
   }
-  const handleChangeSecond = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSecondUrl(e.target.value)
+  const handleChangeSecond = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescribe(e.target.value)
   }
   //  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
   ///  const valueitem = parseInt(e.target.value);
@@ -43,35 +45,41 @@ export default function InputsLayer({ setData, propsUbication, dataLanguage, lan
       setError('');
       setloading(true);
       const urlItem = isValidUrl(firstUrl);
-      const urlitemtwo = isValidUrl(secondUrl);
 
-      if (!urlItem || !urlitemtwo) {
-        return setError(language === 'es' ? 'Ingresa una url válida': 'Please enter a valid url');
+      if (!urlItem) {
+        return setError(language === 'es' ? 'Ingresa una url válida' : 'Please enter a valid url');
       }
-      if(selectedValue === null){
-        return setError(language === 'es' ? 'Selecciona un objetivo': 'Select a target');
+      if (selectedValue === null) {
+        return setError(language === 'es' ? 'Selecciona un objetivo' : 'Select a target');
       }
-      const response = await axios.post("/api/process", { urls: [firstUrl, secondUrl], procesador: 1, userid: session?.user?.id, language: language, objetivo: selectedValue });
+      if(!describe){
+        return setError(language === 'es' ? 'Describe tu producto o servicio' : 'Describe your product or service');
+      }
+      const response = await axios.post("/api/process", { url: [firstUrl], procesador: 1, userid: session?.user?.id, language: language, objetivo: selectedValue, productOrService: describe });
 
       if (response.status === 200) {
-        return setData(response.data.results)
+        return setData(response.data.result)
       }
-      console.log("holaaa: ", selectedValue);
     } catch {
-      return setError(language === 'es' ? 'Error, intenta de nuevo': 'Error, please try again');
+      return setError(language === 'es' ? 'Error, intenta de nuevo' : 'Error, please try again');
     } finally {
       setloading(false)
     }
 
   }
   return (<>
-    <form action="" onSubmit={handleSubmit} className="space-y-4 md:mt-10 max-w-4xl w-full ">
+    <form action="" onSubmit={handleSubmit} className="space-y-2 max-w-4xl w-full ">
       <div className={propsUbication}>
+        <div className="col-span-4 md:col-span-4">
+          <label htmlFor="email" className="font-semibold text-sm tracking-tighter">{dataLanguage?.principalView?.labelOne}<span className="text-red-500 text-sm"> *</span></label>
+          <Input type="text" id="url" placeholder={dataLanguage?.principalView?.placeHolderOne} className="w-full px-3  placeholder:text-silver-900 border-blue-700 hover:border-1 focus:border-none hover:ring-blue-600 focus-visible:ring-blue-600 focus:ring-0 h-10 resize-none bg-white" onChange={handleChange} value={firstUrl} />
+
+        </div>
         <div className="col-span-4">
-          <label htmlFor="email" className="font-semibold text-sm lg:text-lg tracking-tighter">{dataLanguage?.principalView?.objetivo}</label>
+          <label htmlFor="email" className="font-semibold text-sm tracking-tighter">{dataLanguage?.principalView?.objetivo}<span className="text-red-500 text-sm"> *</span></label>
           <Select onValueChange={(value) => setSelectedValue(value)} >
-            <SelectTrigger className="w-full focus:ring-1  active:ring-1 focus:ring-blue-600  ring-blue-600">
-              <SelectValue placeholder="Selecciona un objetivo" />
+            <SelectTrigger className="w-full px-3  placeholder:text-silver-900 border-blue-700 hover:border-1 focus:border-1 hover:ring-blue-600 focus-visible:ring-blue-600 focus:ring-0 h-10 active:ring-blue-600  resize-none bg-white">
+              <SelectValue placeholder={language === 'es' ? "Selecciona un objetivo": "Select a target"} className="placeholder:text-gray-400" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -84,14 +92,11 @@ export default function InputsLayer({ setData, propsUbication, dataLanguage, lan
             </SelectContent>
           </Select>
         </div>
-        <div className="col-span-4 md:col-span-2">
-          <label htmlFor="email" className="font-semibold text-sm lg:text-lg tracking-tighter ">{dataLanguage?.principalView?.labelOne}</label>
-          <Input type="text" id="url" placeholder={dataLanguage?.principalView?.placeHolderOne} className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-blue-600 focus:ring-0 h-10 resize-none bg-white" onChange={handleChange} value={firstUrl} />
 
-        </div>
-        <div className="col-span-4 md:col-span-2">
-          <label htmlFor="email" className="font-semibold text-sm lg:text-lg tracking-tighter">{dataLanguage?.principalView?.labelTwo}</label>
-          <Input type="text" id="secondurl" placeholder={dataLanguage?.principalView?.placeholderTwo} className="w-full px-3  placeholder:text-silver-900 focus-visible:ring-blue-600 focus:ring-0 h-10 resize-none bg-white" onChange={handleChangeSecond} value={secondUrl} />
+        <div className="col-span-4">
+          <label htmlFor="email" className="font-semibold text-sm  tracking-tighter flex items-center gap-1">{dataLanguage?.principalView?.labelTwo}
+            <TooltipProvider><Tooltip ><TooltipTrigger className="flex items-center" asChild><span><CircleHelp className="w-4 h-4" /><span className="text-red-500 text-sm">*</span></span></TooltipTrigger><TooltipContent className="max-w-xs"><p className="text-center">{dataLanguage?.recommend}</p></TooltipContent></Tooltip></TooltipProvider></label>
+          <Textarea id="describe" placeholder={dataLanguage?.principalView?.placeholderTwo} className="w-full px-3  placeholder:text-silver-900 border-blue-700 hover:border-1 focus:border-none hover:border-blue-600 focus-visible:ring-blue-600 focus:ring-0 h-10 resize-none bg-white" onChange={handleChangeSecond} value={describe} />
         </div>
         {/*   <div className="col-span-1 space-y-2 w-full">
                     <label htmlFor="email" className="font-semibold text-base lg:text-lg">Seleccionar AI</label>
@@ -101,6 +106,13 @@ export default function InputsLayer({ setData, propsUbication, dataLanguage, lan
                     </select>
                 </div>
                 */}
+      </div>
+
+      <div className="flex justify-center w-full h-2 mt-0">{
+        error &&
+        <span className="text-center  text-red-600 text-[10px] font-semibold rounded px-3">{error}</span>
+
+      }
       </div>
 
       <div className="flex justify-center">
@@ -134,17 +146,17 @@ export default function InputsLayer({ setData, propsUbication, dataLanguage, lan
             </motion.div>
 
           ) :
-            session?.user ? (<Button
+            session?.user ? (<div className="bg-results bg-cover w-[292px] h-[152px] flex flex-col items-start">
+              <Button
 
-              className="bg-blue-600 hover:bg-blue-500 text-white w-full md:w-auto px-4 h-10 md:text-md shadow-lg">{dataLanguage?.principalView?.actionSubmit}  <ArrowRight className="w-5 h-5" /></Button>) : (
+                className=" bg-transparent text-white hover:bg-transparent pl-12 pr-4 h-10 md:text-md min-w-[160px] relative inline-flex justify-center items-center">{dataLanguage?.principalView?.actionSubmit}  </Button>
+            </div>) : (
               <LoginButton dataLanguage={dataLanguage} provider="google" className="shadow-sm border-gray-300" />
 
             )
         }
       </div>
-      {
-        error && <div className="flex justify-center w-full"><span className="text-center  text-red-600 text-[10px] font-bold rounded px-3">{error}</span></div>
-      }
+
     </form>
 
   </>)

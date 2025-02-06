@@ -12,7 +12,8 @@ import Script from "next/script";
 import dataLanguage from '@/lib/data.json';
 
 import { Button } from "@/components/ui/button";
-import { Sparkles, X } from "lucide-react";
+import { CircleHelp, Sparkles, X } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 // Declaración del elemento personalizado
 type Language = "es" | "en";
 
@@ -84,7 +85,7 @@ export default function Home() {
       // Se carga después de que el contenido de la página se haya cargado
       />
       <div className="fixed left-4 md:left-10 bottom-2 md:bottom-10 flex z-10 gap-2">
-        <Button onClick={handleModal} className="text-white  text-[10px] bg-blue-600  font-bold ">{dataLanguage[language]?.btnSuggestion}</Button>
+        <Button onClick={handleModal} className="text-white  text-[8px] bg-blue-600  font-bold ">{dataLanguage[language]?.btnSuggestion}</Button>
 
       </div>
       {
@@ -100,9 +101,9 @@ export default function Home() {
 
         </div>
       }
-      <section className="flex justify-center items-center h-full py-10 px-6 md:py-16 fade-in ">
+      <section className="flex justify-center items-center h-full py-4 px-6 md:py-16 fade-in ">
         <div className="md:max-w-4xl flex flex-col justify-center items-center ">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-lg mb-2 shadow-blue-100 ">
+          <div className="inline-flex items-center gap-2 px-4 py-1 md:py-2 rounded-full bg-white shadow-lg mb-2 shadow-blue-100 ">
             <Sparkles className="w-4 h-4 text-blue-600" />
             <span className="text-[10px] font-medium">{dataLanguage[language]?.dataAI}</span>
           </div>
@@ -115,7 +116,7 @@ export default function Home() {
 
             ) :
 
-              <div className="  w-full   py-10">
+              <div className="  w-full  py-4 md:py-10">
                 {/**
                  * SECTOR
                  * OBJETIVO - CAPTAR LEADS, CONSEGUIR CITAS
@@ -123,6 +124,23 @@ export default function Home() {
                 <InputsLayer data={data} setData={setData} language={language} dataLanguage={dataLanguage[language]} propsUbication="grid grid-cols-1 md:grid-cols-4 gap-4" />
               </div>
           }
+
+          <Dialog>
+            <DialogTrigger className="fixed right-4 bottom-4 md:bottom-10 bg-blue-600 rounded-full text-white p-2"><CircleHelp  /></DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle></DialogTitle>
+                <DialogDescription>
+
+                  <div className="relative max-w-screen-lg mx-auto lg:px-0 flex justify-center w-full" style={{ aspectRatio: "16/9" }}>
+
+                    <iframe className="w-full h-full rounded-lg shadow-lg" src="https://www.youtube.com/embed/esYiMtErJfI?si=SvgUztoHXTdKXfwA" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+
         </div>
       </section>
     </>

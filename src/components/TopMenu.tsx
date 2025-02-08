@@ -22,7 +22,7 @@ export const TopMenu: React.FC<NavBarProps> = ({ dataLanguage, setLanguage, lang
   };
 
   return (
-    <nav className="flex justify-between xl:justify-center  top-0 left-0 right-0 bg- z-10 px-2 md:px-0">
+    <nav className="flex justify-between md:justify-center xl:justify-center  top-0 left-0 right-0 bg- z-10 px-2 md:px-0">
       <div className="max-w-4xl flex w-full justify-between md:justify-between items-center py-2">
 
     

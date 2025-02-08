@@ -126,7 +126,7 @@ export default function Home() {
           }
 
           <Dialog>
-            <DialogTrigger className="fixed right-4 bottom-4 md:bottom-10 bg-blue-600 rounded-full text-white p-2"><CircleHelp  /></DialogTrigger>
+            <DialogTrigger className="fixed right-6 bottom-4 md:bottom-10 bg-blue-600 rounded-full text-white p-2"><CircleHelp  /></DialogTrigger>
             <DialogContent className="max-w-3xl">
               <DialogHeader>
                 <DialogTitle></DialogTitle>
